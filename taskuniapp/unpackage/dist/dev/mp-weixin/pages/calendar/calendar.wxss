@@ -1,0 +1,197 @@
+
+.container.data-v-6e8913ab {
+    min-height: 100vh;
+    background: #F5F5F5;
+    padding: 20rpx;
+    padding-bottom: 40rpx;
+}
+.month-selector.data-v-6e8913ab {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30rpx 40rpx;
+    background: #FFFFFF;
+    border-radius: 16rpx;
+    margin-bottom: 20rpx;
+}
+.month-btn.data-v-6e8913ab {
+    width: 60rpx;
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F5F5F5;
+    border-radius: 30rpx;
+}
+.arrow.data-v-6e8913ab {
+    font-size: 40rpx;
+    color: #667eea;
+    font-weight: bold;
+}
+.month-text.data-v-6e8913ab {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333333;
+}
+.stats-card.data-v-6e8913ab {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16rpx;
+    padding: 30rpx;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20rpx;
+}
+.stat-item.data-v-6e8913ab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.stat-num.data-v-6e8913ab {
+    font-size: 40rpx;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+.stat-label.data-v-6e8913ab {
+    font-size: 24rpx;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 8rpx;
+}
+.calendar-card.data-v-6e8913ab {
+    background: #FFFFFF;
+    border-radius: 16rpx;
+    padding: 30rpx;
+    margin-bottom: 20rpx;
+}
+.weekdays.data-v-6e8913ab {
+    display: flex;
+    margin-bottom: 20rpx;
+}
+.weekday.data-v-6e8913ab {
+    flex: 1;
+    text-align: center;
+    font-size: 24rpx;
+    color: #999999;
+    font-weight: bold;
+}
+.days-grid.data-v-6e8913ab {
+    display: flex;
+    flex-wrap: wrap;
+}
+.day-cell.data-v-6e8913ab {
+    width: 14.28%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 10rpx;
+}
+.day-num.data-v-6e8913ab {
+    font-size: 28rpx;
+    color: #333333;
+}
+.day-cell.other-month .day-num.data-v-6e8913ab {
+    color: #CCCCCC;
+}
+.day-cell.today.data-v-6e8913ab {
+    background: #E8F5E9;
+    border-radius: 50%;
+}
+.day-cell.today .day-num.data-v-6e8913ab {
+    color: #4CAF50;
+    font-weight: bold;
+}
+.day-cell.has-checkin.data-v-6e8913ab {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+}
+.day-cell.has-checkin .day-num.data-v-6e8913ab {
+    color: #FFFFFF;
+    font-weight: bold;
+}
+.checkin-dot.data-v-6e8913ab {
+    position: absolute;
+    bottom: 5rpx;
+}
+.dot-icon.data-v-6e8913ab {
+    font-size: 12rpx;
+    color: #FF9800;
+}
+.detail-card.data-v-6e8913ab {
+    background: #FFFFFF;
+    border-radius: 16rpx;
+    padding: 30rpx;
+}
+.detail-header.data-v-6e8913ab {
+    margin-bottom: 20rpx;
+}
+.detail-title.data-v-6e8913ab {
+    font-size: 28rpx;
+    font-weight: bold;
+    color: #333333;
+}
+.checkin-item.data-v-6e8913ab {
+    padding: 20rpx;
+    background: #F5F5F5;
+    border-radius: 12rpx;
+    margin-bottom: 15rpx;
+}
+.checkin-item.data-v-6e8913ab:last-child {
+    margin-bottom: 0;
+}
+.checkin-header.data-v-6e8913ab {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10rpx;
+}
+.category-tag.data-v-6e8913ab {
+    padding: 4rpx 12rpx;
+    border-radius: 8rpx;
+    font-size: 20rpx;
+    margin-right: 10rpx;
+}
+.category-study.data-v-6e8913ab {
+    background: #E3F2FD;
+    color: #2196F3;
+}
+.category-sport.data-v-6e8913ab {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+.category-read.data-v-6e8913ab {
+    background: #F3E5F5;
+    color: #9C27B0;
+}
+.category-health.data-v-6e8913ab {
+    background: #E8F5E9;
+    color: #4CAF50;
+}
+.category-work.data-v-6e8913ab {
+    background: #FBE9E7;
+    color: #FF5722;
+}
+.category-other.data-v-6e8913ab {
+    background: #F5F5F5;
+    color: #757575;
+}
+.task-title.data-v-6e8913ab {
+    font-size: 26rpx;
+    color: #333333;
+    flex: 1;
+}
+.checkin-note.data-v-6e8913ab {
+    font-size: 24rpx;
+    color: #666666;
+    line-height: 1.6;
+}
+.empty-detail.data-v-6e8913ab {
+    background: #FFFFFF;
+    border-radius: 16rpx;
+    padding: 60rpx;
+    text-align: center;
+}
+.empty-text.data-v-6e8913ab {
+    font-size: 26rpx;
+    color: #999999;
+}

@@ -1,0 +1,1 @@
+<view class="custom-tabbar data-v-51c48e3c"><view wx:for="{{a}}" wx:for-item="item" wx:key="e" class="tab-item data-v-51c48e3c" bindtap="{{item.f}}"><text class="{{['iconfont', 'data-v-51c48e3c', item.a]}}" style="{{'color:' + item.b}}"></text><text class="tab-text data-v-51c48e3c" style="{{'color:' + item.d}}">{{item.c}}</text></view></view>

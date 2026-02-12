@@ -1,0 +1,1 @@
+{"version":3,"file":"achievement.js","sources":["api/achievement.js"],"sourcesContent":["import request from '@/utils/request';\n\n// 获取用户成就列表\nexport function getAchievements() {\n    return request.get('/achievements');\n}\n"],"names":["request"],"mappings":";;AAGO,SAAS,kBAAkB;AAC9B,SAAOA,cAAO,QAAC,IAAI,eAAe;AACtC;;"}
