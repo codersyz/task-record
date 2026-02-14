@@ -276,7 +276,7 @@ export default {
     min-height: 100vh;
     background: #F5F5F5;
     padding: 20rpx;
-    padding-bottom: 40rpx;
+    padding-bottom: 100rpx;
 }
 
 .month-selector {

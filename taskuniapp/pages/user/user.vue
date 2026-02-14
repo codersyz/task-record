@@ -4,6 +4,15 @@
         <view class="user-card">
             <image class="avatar" :src="userInfo.avatar_url || '/static/logo.webp'" mode="aspectFill"></image>
             <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
+
+            <!-- 积分信息 -->
+            <view class="points-badge">
+                <text class="points-icon">💎</text>
+                <text class="points-text">{{ pointsInfo.points || 0 }} 积分</text>
+            </view>
+            <view class="streak-info">
+                <text class="streak-text">🔥 连续打卡 {{ pointsInfo.consecutiveDays || 0 }} 天</text>
+            </view>
         </view>
 
         <!-- 统计信息 -->
@@ -24,6 +33,22 @@
 
         <!-- 功能列表 -->
         <view class="menu-list">
+            <view class="menu-item" @click="goToShop">
+                <text class="menu-icon">🛒</text>
+                <text class="menu-text">积分商城</text>
+                <view class="menu-badge">即将上线</view>
+                <text class="menu-arrow">›</text>
+            </view>
+            <view class="menu-item" @click="goToPointRecords">
+                <text class="menu-icon">💎</text>
+                <text class="menu-text">积分明细</text>
+                <text class="menu-arrow">›</text>
+            </view>
+            <view class="menu-item" @click="goToRanking">
+                <text class="menu-icon">📊</text>
+                <text class="menu-text">积分排行榜</text>
+                <text class="menu-arrow">›</text>
+            </view>
             <view class="menu-item" @click="goToCalendar">
                 <text class="menu-icon">📅</text>
                 <text class="menu-text">打卡日历</text>
@@ -55,6 +80,7 @@
 import customTabbar from '@/components/custom-tabbar/custom-tabbar.vue';
 import { getUserInfo } from '@/api/auth';
 import { getTaskList } from '@/api/task';
+import { getUserPoints } from '@/api/point';
 
 export default {
     components: {
@@ -63,6 +89,10 @@ export default {
     data() {
         return {
             userInfo: {},
+            pointsInfo: {
+                points: 0,
+                consecutiveDays: 0
+            },
             stats: {
                 totalTasks: 0,
                 totalCheckins: 0,
@@ -73,6 +103,7 @@ export default {
     onShow() {
         this.loadUserInfo();
         this.loadStats();
+        this.loadPoints();
     },
     methods: {
         async loadUserInfo() {
@@ -100,6 +131,17 @@ export default {
             }
         },
 
+        async loadPoints() {
+            try {
+                const res = await getUserPoints();
+                if (res.code === 200) {
+                    this.pointsInfo = res.data;
+                }
+            } catch (error) {
+                console.error('加载积分信息失败:', error);
+            }
+        },
+
         // 编辑个人信息
         editProfile() {
             uni.navigateTo({
@@ -118,6 +160,27 @@ export default {
         goToAchievement() {
             uni.navigateTo({
                 url: '/pages/achievement/achievement'
+            });
+        },
+
+        // 跳转到积分商城
+        goToShop() {
+            uni.navigateTo({
+                url: '/pages/points/shop'
+            });
+        },
+
+        // 跳转到积分明细
+        goToPointRecords() {
+            uni.navigateTo({
+                url: '/pages/points/records'
+            });
+        },
+
+        // 跳转到积分排行榜
+        goToRanking() {
+            uni.navigateTo({
+                url: '/pages/points/ranking'
             });
         },
 
@@ -144,7 +207,7 @@ export default {
 .container {
     min-height: 100vh;
     background: #F5F5F5;
-    padding-bottom: 120rpx;
+    padding-bottom: 160rpx;
 }
 
 .user-card {
@@ -167,6 +230,35 @@ export default {
     font-size: 32rpx;
     font-weight: bold;
     color: #FFFFFF;
+}
+
+.points-badge {
+    margin-top: 20rpx;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10rpx 30rpx;
+    border-radius: 30rpx;
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+}
+
+.points-icon {
+    font-size: 28rpx;
+}
+
+.points-text {
+    font-size: 28rpx;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.streak-info {
+    margin-top: 15rpx;
+}
+
+.streak-text {
+    font-size: 24rpx;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .stats-card {
@@ -207,6 +299,7 @@ export default {
     margin-bottom: 15rpx;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 .menu-icon {
@@ -218,6 +311,15 @@ export default {
     font-size: 28rpx;
     color: #333333;
     flex: 1;
+}
+
+.menu-badge {
+    padding: 4rpx 12rpx;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #FFFFFF;
+    font-size: 20rpx;
+    border-radius: 10rpx;
+    margin-right: 10rpx;
 }
 
 .menu-arrow {

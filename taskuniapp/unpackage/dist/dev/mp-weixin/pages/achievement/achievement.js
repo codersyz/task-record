@@ -36,7 +36,7 @@ const _sfc_main = {
         common_vendor.index.hideLoading();
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/achievement/achievement.vue:95", "加载成就失败:", error);
+        common_vendor.index.__f__("error", "at pages/achievement/achievement.vue:91", "加载成就失败:", error);
         common_vendor.index.showToast({
           title: "加载失败",
           icon: "none"

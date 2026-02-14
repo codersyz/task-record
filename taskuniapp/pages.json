@@ -32,6 +32,24 @@
 			}
 		},
 		{
+			"path": "pages/points/records",
+			"style": {
+				"navigationBarTitleText": "积分明细"
+			}
+		},
+		{
+			"path": "pages/points/ranking",
+			"style": {
+				"navigationBarTitleText": "积分排行榜"
+			}
+		},
+		{
+			"path": "pages/points/shop",
+			"style": {
+				"navigationBarTitleText": "积分商城"
+			}
+		},
+		{
 			"path": "pages/task/create",
 			"style": {
 				"navigationBarTitleText": "创建任务"

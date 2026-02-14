@@ -54,11 +54,32 @@ export default {
                 });
 
                 if (res.code === 200) {
+                    // 构建成功消息
+                    let successMsg = `打卡成功！连续${res.data.currentDays}天`;
+
+                    // 检查积分奖励
+                    if (res.data.points && res.data.points.total > 0) {
+                        const points = res.data.points;
+                        let pointsMsg = `\n\n💎 获得 ${points.total} 积分`;
+
+                        if (points.daily > 0) {
+                            pointsMsg += `\n✨ 每日首次打卡 +${points.daily}`;
+                        }
+                        if (points.streak7 > 0) {
+                            pointsMsg += `\n🔥 连续${points.consecutiveDays}天奖励 +${points.streak7}`;
+                        }
+                        if (points.streak30 > 0) {
+                            pointsMsg += `\n⭐ 连续${points.consecutiveDays}天奖励 +${points.streak30}`;
+                        }
+
+                        successMsg += pointsMsg;
+                    }
+
                     // 检查是否完成目标
                     if (res.data.isCompleted) {
                         uni.showModal({
                             title: '🎉 恭喜',
-                            content: '打卡成功！你已完成目标任务！',
+                            content: '打卡成功！你已完成目标任务！' + (res.data.points && res.data.points.total > 0 ? `\n\n💎 获得 ${res.data.points.total} 积分` : ''),
                             showCancel: false,
                             success: () => {
                                 // 检查是否有新成就
@@ -70,19 +91,36 @@ export default {
                             }
                         });
                     } else {
-                        uni.showToast({
-                            title: `打卡成功！连续${res.data.currentDays}天`,
-                            icon: 'success'
-                        });
+                        // 显示积分奖励弹窗
+                        if (res.data.points && res.data.points.total > 0) {
+                            uni.showModal({
+                                title: '✅ 打卡成功',
+                                content: successMsg,
+                                showCancel: false,
+                                success: () => {
+                                    // 检查是否有新成就
+                                    if (res.data.newAchievements && res.data.newAchievements.length > 0) {
+                                        this.showNewAchievements(res.data.newAchievements);
+                                    } else {
+                                        uni.navigateBack();
+                                    }
+                                }
+                            });
+                        } else {
+                            uni.showToast({
+                                title: successMsg,
+                                icon: 'success'
+                            });
 
-                        setTimeout(() => {
-                            // 检查是否有新成就
-                            if (res.data.newAchievements && res.data.newAchievements.length > 0) {
-                                this.showNewAchievements(res.data.newAchievements);
-                            } else {
-                                uni.navigateBack();
-                            }
-                        }, 1500);
+                            setTimeout(() => {
+                                // 检查是否有新成就
+                                if (res.data.newAchievements && res.data.newAchievements.length > 0) {
+                                    this.showNewAchievements(res.data.newAchievements);
+                                } else {
+                                    uni.navigateBack();
+                                }
+                            }, 1500);
+                        }
                     }
                 } else if (res.code === 1001) {
                     // 今天已经打卡过了

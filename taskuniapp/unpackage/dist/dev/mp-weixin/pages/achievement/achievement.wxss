@@ -3,7 +3,7 @@
     min-height: 100vh;
     background: #F5F5F5;
     padding: 20rpx;
-    padding-bottom: 40rpx;
+    padding-bottom: 100rpx;
 }
 .header-card.data-v-127b3c96 {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

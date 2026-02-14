@@ -18,6 +18,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/checkins', require('./routes/checkins'));
 app.use('/api/achievements', require('./routes/achievements'));
+app.use('/api/points', require('./routes/points'));
 
 // 健康检查
 app.get('/health', (req, res) => {

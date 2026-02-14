@@ -129,9 +129,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
     a: common_assets._imports_0,
     b: common_vendor.o((...args) => $options.handleLogin && $options.handleLogin(...args)),
-    c: $data.loading,
-    d: common_vendor.o((...args) => $options.handleTestLogin && $options.handleTestLogin(...args)),
-    e: $data.testLoading
+    c: $data.loading
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-e4e4508d"]]);

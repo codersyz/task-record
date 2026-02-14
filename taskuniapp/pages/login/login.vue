@@ -10,9 +10,9 @@
             </button>
 
             <!-- 开发环境：测试登录按钮 -->
-            <button class="test-login-btn" @click="handleTestLogin" :loading="testLoading">
+            <!-- <button class="test-login-btn" @click="handleTestLogin" :loading="testLoading">
                 测试登录（开发用）
-            </button>
+            </button> -->
         </view>
     </view>
 </template>

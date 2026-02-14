@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const api_auth = require("../../api/auth.js");
 const api_task = require("../../api/task.js");
+const api_point = require("../../api/point.js");
 const customTabbar = () => "../../components/custom-tabbar/custom-tabbar.js";
 const _sfc_main = {
   components: {
@@ -10,6 +11,10 @@ const _sfc_main = {
   data() {
     return {
       userInfo: {},
+      pointsInfo: {
+        points: 0,
+        consecutiveDays: 0
+      },
       stats: {
         totalTasks: 0,
         totalCheckins: 0,
@@ -20,6 +25,7 @@ const _sfc_main = {
   onShow() {
     this.loadUserInfo();
     this.loadStats();
+    this.loadPoints();
   },
   methods: {
     async loadUserInfo() {
@@ -29,7 +35,7 @@ const _sfc_main = {
           this.userInfo = res.data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:85", "加载用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:116", "加载用户信息失败:", error);
       }
     },
     async loadStats() {
@@ -42,7 +48,17 @@ const _sfc_main = {
           this.stats.maxStreak = Math.max(...tasks.map((t) => t.current_days), 0);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:99", "加载统计信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:130", "加载统计信息失败:", error);
+      }
+    },
+    async loadPoints() {
+      try {
+        const res = await api_point.getUserPoints();
+        if (res.code === 200) {
+          this.pointsInfo = res.data;
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/user/user.vue:141", "加载积分信息失败:", error);
       }
     },
     // 编辑个人信息
@@ -61,6 +77,24 @@ const _sfc_main = {
     goToAchievement() {
       common_vendor.index.navigateTo({
         url: "/pages/achievement/achievement"
+      });
+    },
+    // 跳转到积分商城
+    goToShop() {
+      common_vendor.index.navigateTo({
+        url: "/pages/points/shop"
+      });
+    },
+    // 跳转到积分明细
+    goToPointRecords() {
+      common_vendor.index.navigateTo({
+        url: "/pages/points/records"
+      });
+    },
+    // 跳转到积分排行榜
+    goToRanking() {
+      common_vendor.index.navigateTo({
+        url: "/pages/points/ranking"
       });
     },
     handleLogout() {
@@ -92,13 +126,18 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
     a: $data.userInfo.avatar_url || "/static/logo.webp",
     b: common_vendor.t($data.userInfo.nickname || "未设置昵称"),
-    c: common_vendor.t($data.stats.totalTasks),
-    d: common_vendor.t($data.stats.totalCheckins),
-    e: common_vendor.t($data.stats.maxStreak),
-    f: common_vendor.o((...args) => $options.goToCalendar && $options.goToCalendar(...args)),
-    g: common_vendor.o((...args) => $options.goToAchievement && $options.goToAchievement(...args)),
-    h: common_vendor.o((...args) => $options.editProfile && $options.editProfile(...args)),
-    i: common_vendor.o((...args) => $options.handleLogout && $options.handleLogout(...args))
+    c: common_vendor.t($data.pointsInfo.points || 0),
+    d: common_vendor.t($data.pointsInfo.consecutiveDays || 0),
+    e: common_vendor.t($data.stats.totalTasks),
+    f: common_vendor.t($data.stats.totalCheckins),
+    g: common_vendor.t($data.stats.maxStreak),
+    h: common_vendor.o((...args) => $options.goToShop && $options.goToShop(...args)),
+    i: common_vendor.o((...args) => $options.goToPointRecords && $options.goToPointRecords(...args)),
+    j: common_vendor.o((...args) => $options.goToRanking && $options.goToRanking(...args)),
+    k: common_vendor.o((...args) => $options.goToCalendar && $options.goToCalendar(...args)),
+    l: common_vendor.o((...args) => $options.goToAchievement && $options.goToAchievement(...args)),
+    m: common_vendor.o((...args) => $options.editProfile && $options.editProfile(...args)),
+    n: common_vendor.o((...args) => $options.handleLogout && $options.handleLogout(...args))
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-0f7520f0"]]);

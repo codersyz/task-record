@@ -7,6 +7,9 @@ if (!Math) {
   "./pages/profile-edit.js";
   "./pages/calendar/calendar.js";
   "./pages/achievement/achievement.js";
+  "./pages/points/records.js";
+  "./pages/points/ranking.js";
+  "./pages/points/shop.js";
   "./pages/task/create.js";
   "./pages/task/detail.js";
   "./pages/checkin/checkin.js";

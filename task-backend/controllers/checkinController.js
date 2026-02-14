@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { checkAndUnlockAchievements } = require('./achievementController');
+const { handleCheckinPoints } = require('./pointController');
 
 // 打卡
 exports.checkin = async (req, res) => {
@@ -46,10 +47,12 @@ exports.checkin = async (req, res) => {
     }
 
     // 插入打卡记录
-    await connection.query(
+    const [checkinResult] = await connection.query(
       'INSERT INTO checkins (task_id, user_id, checkin_date, note, images) VALUES (?, ?, ?, ?, ?)',
       [taskId, userId, today, note || '', JSON.stringify(images || [])]
     );
+    
+    const checkinId = checkinResult.insertId;
 
     // 检查是否连续打卡
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
@@ -84,6 +87,15 @@ exports.checkin = async (req, res) => {
 
     // 检查并解锁成就
     const newAchievements = await checkAndUnlockAchievements(userId);
+    
+    // 处理积分奖励
+    let pointsEarned = null;
+    try {
+      pointsEarned = await handleCheckinPoints(userId, taskId, checkinId);
+    } catch (error) {
+      console.error('处理积分失败:', error);
+      // 积分失败不影响打卡成功
+    }
 
     res.json({
       code: 200,
@@ -92,7 +104,8 @@ exports.checkin = async (req, res) => {
         currentDays,
         totalDays: newTotalDays,
         isCompleted: newStatus === 0,
-        newAchievements: newAchievements.length > 0 ? newAchievements : undefined
+        newAchievements: newAchievements.length > 0 ? newAchievements : undefined,
+        points: pointsEarned
       }
     });
 

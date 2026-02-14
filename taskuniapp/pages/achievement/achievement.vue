@@ -14,19 +14,15 @@
 
         <!-- 成就列表 -->
         <view class="achievement-list">
-            <view 
-                v-for="(item, index) in achievements" 
-                :key="index"
-                class="achievement-item"
-                :class="{ unlocked: item.unlocked }"
-            >
+            <view v-for="(item, index) in achievements" :key="index" class="achievement-item"
+                :class="{ unlocked: item.unlocked }">
                 <view class="achievement-icon">
                     <text class="icon-emoji">{{ item.icon }}</text>
                     <view v-if="item.unlocked" class="unlock-badge">
                         <text class="badge-text">✓</text>
                     </view>
                 </view>
-                
+
                 <view class="achievement-content">
                     <view class="achievement-header">
                         <text class="achievement-name">{{ item.name }}</text>
@@ -34,9 +30,9 @@
                             {{ formatDate(item.unlockedAt) }}
                         </text>
                     </view>
-                    
+
                     <text class="achievement-desc">{{ item.desc }}</text>
-                    
+
                     <!-- 进度条 -->
                     <view v-if="!item.unlocked" class="progress-bar">
                         <view class="progress-fill" :style="{ width: item.progress.percentage + '%' }"></view>
@@ -83,7 +79,7 @@ export default {
                         if (!a.unlocked && b.unlocked) return 1;
                         return 0;
                     });
-                    
+
                     this.unlockedCount = res.data.unlockedCount;
                     this.totalCount = res.data.totalCount;
                     this.completionRate = Math.round((this.unlockedCount / this.totalCount) * 100);
@@ -116,7 +112,7 @@ export default {
     min-height: 100vh;
     background: #F5F5F5;
     padding: 20rpx;
-    padding-bottom: 40rpx;
+    padding-bottom: 100rpx;
 }
 
 .header-card {

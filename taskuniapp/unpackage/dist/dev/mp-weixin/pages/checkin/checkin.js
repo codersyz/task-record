@@ -33,10 +33,32 @@ const _sfc_main = {
           note: this.note
         });
         if (res.code === 200) {
+          let successMsg = `打卡成功！连续${res.data.currentDays}天`;
+          if (res.data.points && res.data.points.total > 0) {
+            const points = res.data.points;
+            let pointsMsg = `
+
+💎 获得 ${points.total} 积分`;
+            if (points.daily > 0) {
+              pointsMsg += `
+✨ 每日首次打卡 +${points.daily}`;
+            }
+            if (points.streak7 > 0) {
+              pointsMsg += `
+🔥 连续${points.consecutiveDays}天奖励 +${points.streak7}`;
+            }
+            if (points.streak30 > 0) {
+              pointsMsg += `
+⭐ 连续${points.consecutiveDays}天奖励 +${points.streak30}`;
+            }
+            successMsg += pointsMsg;
+          }
           if (res.data.isCompleted) {
             common_vendor.index.showModal({
               title: "🎉 恭喜",
-              content: "打卡成功！你已完成目标任务！",
+              content: "打卡成功！你已完成目标任务！" + (res.data.points && res.data.points.total > 0 ? `
+
+💎 获得 ${res.data.points.total} 积分` : ""),
               showCancel: false,
               success: () => {
                 if (res.data.newAchievements && res.data.newAchievements.length > 0) {
@@ -47,17 +69,32 @@ const _sfc_main = {
               }
             });
           } else {
-            common_vendor.index.showToast({
-              title: `打卡成功！连续${res.data.currentDays}天`,
-              icon: "success"
-            });
-            setTimeout(() => {
-              if (res.data.newAchievements && res.data.newAchievements.length > 0) {
-                this.showNewAchievements(res.data.newAchievements);
-              } else {
-                common_vendor.index.navigateBack();
-              }
-            }, 1500);
+            if (res.data.points && res.data.points.total > 0) {
+              common_vendor.index.showModal({
+                title: "✅ 打卡成功",
+                content: successMsg,
+                showCancel: false,
+                success: () => {
+                  if (res.data.newAchievements && res.data.newAchievements.length > 0) {
+                    this.showNewAchievements(res.data.newAchievements);
+                  } else {
+                    common_vendor.index.navigateBack();
+                  }
+                }
+              });
+            } else {
+              common_vendor.index.showToast({
+                title: successMsg,
+                icon: "success"
+              });
+              setTimeout(() => {
+                if (res.data.newAchievements && res.data.newAchievements.length > 0) {
+                  this.showNewAchievements(res.data.newAchievements);
+                } else {
+                  common_vendor.index.navigateBack();
+                }
+              }, 1500);
+            }
           }
         } else if (res.code === 1001) {
           common_vendor.index.showModal({
@@ -75,7 +112,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/checkin/checkin.vue:104", "打卡失败:", error);
+        common_vendor.index.__f__("error", "at pages/checkin/checkin.vue:142", "打卡失败:", error);
         common_vendor.index.showToast({
           title: "打卡失败，请重试",
           icon: "none"
