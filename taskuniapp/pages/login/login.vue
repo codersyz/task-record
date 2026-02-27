@@ -9,6 +9,10 @@
                 微信一键登录
             </button>
 
+            <button class="skip-btn" @click="skipLogin">
+                跳过，以游客身份浏览
+            </button>
+
             <!-- 开发环境：测试登录按钮 -->
             <!-- <button class="test-login-btn" @click="handleTestLogin" :loading="testLoading">
                 测试登录（开发用）
@@ -39,6 +43,8 @@ export default {
                     // 保存token
                     uni.setStorageSync('token', res.data.token);
                     uni.setStorageSync('userId', res.data.userId);
+                    // 清除游客模式标识
+                    uni.removeStorageSync('isGuestMode');
 
                     uni.showToast({
                         title: '登录成功',
@@ -89,6 +95,8 @@ export default {
                                 // 保存token
                                 uni.setStorageSync('token', res.data.token);
                                 uni.setStorageSync('userId', res.data.userId);
+                                // 清除游客模式标识
+                                uni.removeStorageSync('isGuestMode');
 
                                 uni.showToast({
                                     title: '登录成功',
@@ -162,6 +170,14 @@ export default {
                 });
             });
         },
+
+        // 跳过登录，以游客身份浏览
+        skipLogin() {
+            uni.setStorageSync('isGuestMode', true);
+            uni.switchTab({
+                url: '/pages/index/index'
+            });
+        }
     }
 };
 </script>
@@ -222,5 +238,16 @@ export default {
     border-radius: 44rpx;
     font-size: 28rpx;
     border: 2rpx solid #FFFFFF;
+}
+
+.skip-btn {
+    width: 500rpx;
+    height: 88rpx;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 44rpx;
+    font-size: 28rpx;
+    border: none;
+    margin-top: 20rpx;
 }
 </style>

@@ -18,12 +18,16 @@ if (!Math) {
 const _sfc_main = {
   onLaunch: function() {
     common_vendor.index.__f__("log", "at App.vue:4", "App Launch");
+    const token = common_vendor.index.getStorageSync("token");
+    if (!token) {
+      common_vendor.index.setStorageSync("isGuestMode", true);
+    }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:7", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:13", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:10", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:16", "App Hide");
   }
 };
 function createApp() {

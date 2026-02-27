@@ -3,16 +3,20 @@
         <!-- 用户信息 -->
         <view class="user-card">
             <image class="avatar" :src="userInfo.avatar_url || '/static/logo.webp'" mode="aspectFill"></image>
-            <text class="nickname">{{ userInfo.nickname || '未设置昵称' }}</text>
+            <text class="nickname" v-if="!isGuestMode">{{ userInfo.nickname || '未设置昵称' }}</text>
+            <text class="nickname" v-else>游客模式</text>
 
             <!-- 积分信息 -->
-            <view class="points-badge">
+            <view class="points-badge" v-if="!isGuestMode">
                 <text class="points-icon">💎</text>
                 <text class="points-text">{{ pointsInfo.points || 0 }} 积分</text>
             </view>
-            <view class="streak-info">
+            <view class="streak-info" v-if="!isGuestMode">
                 <text class="streak-text">🔥 连续打卡 {{ pointsInfo.consecutiveDays || 0 }} 天</text>
             </view>
+            <button v-else class="guest-login-btn-card" @click="goToLogin">
+                立即登录
+            </button>
         </view>
 
         <!-- 统计信息 -->
@@ -65,8 +69,10 @@
                 <text class="menu-arrow">›</text>
             </view>
             <view class="menu-item" @click="handleLogout">
-                <text class="menu-icon">🚪</text>
-                <text class="menu-text">退出登录</text>
+                <text class="menu-icon" v-if="!isGuestMode">🚪</text>
+                <text class="menu-icon" v-else>🔑</text>
+                <text class="menu-text" v-if="!isGuestMode">退出登录</text>
+                <text class="menu-text" v-else>立即登录</text>
                 <text class="menu-arrow">›</text>
             </view>
         </view>
@@ -97,13 +103,19 @@ export default {
                 totalTasks: 0,
                 totalCheckins: 0,
                 maxStreak: 0
-            }
+            },
+            isGuestMode: false
         };
     },
     onShow() {
-        this.loadUserInfo();
-        this.loadStats();
-        this.loadPoints();
+        const token = uni.getStorageSync('token');
+        this.isGuestMode = !token;
+
+        if (token) {
+            this.loadUserInfo();
+            this.loadStats();
+            this.loadPoints();
+        }
     },
     methods: {
         async loadUserInfo() {
@@ -144,6 +156,7 @@ export default {
 
         // 编辑个人信息
         editProfile() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/profile-edit'
             });
@@ -151,6 +164,7 @@ export default {
 
         // 跳转到打卡日历
         goToCalendar() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/calendar/calendar'
             });
@@ -158,6 +172,7 @@ export default {
 
         // 跳转到成就中心
         goToAchievement() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/achievement/achievement'
             });
@@ -165,6 +180,7 @@ export default {
 
         // 跳转到积分商城
         goToShop() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/points/shop'
             });
@@ -172,6 +188,7 @@ export default {
 
         // 跳转到积分明细
         goToPointRecords() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/points/records'
             });
@@ -179,12 +196,47 @@ export default {
 
         // 跳转到积分排行榜
         goToRanking() {
+            if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/points/ranking'
             });
         },
 
+        // 检查游客模式
+        checkGuestMode() {
+            if (this.isGuestMode) {
+                uni.showModal({
+                    title: '提示',
+                    content: '请先登录后使用此功能',
+                    confirmText: '去登录',
+                    cancelText: '继续浏览',
+                    success: (res) => {
+                        if (res.confirm) {
+                            uni.navigateTo({
+                                url: '/pages/login/login'
+                            });
+                        }
+                    }
+                });
+                return true;
+            }
+            return false;
+        },
+
+        // 跳转到登录页
+        goToLogin() {
+            uni.navigateTo({
+                url: '/pages/login/login'
+            });
+        },
+
         handleLogout() {
+            // 如果是游客模式，直接跳转登录
+            if (this.isGuestMode) {
+                this.goToLogin();
+                return;
+            }
+
             uni.showModal({
                 title: '提示',
                 content: '确定要退出登录吗？',
@@ -192,8 +244,9 @@ export default {
                     if (res.confirm) {
                         uni.removeStorageSync('token');
                         uni.removeStorageSync('userId');
+                        uni.setStorageSync('isGuestMode', true);
                         uni.reLaunch({
-                            url: '/pages/login/login'
+                            url: '/pages/index/index'
                         });
                     }
                 }
@@ -259,6 +312,18 @@ export default {
 .streak-text {
     font-size: 24rpx;
     color: rgba(255, 255, 255, 0.9);
+}
+
+.guest-login-btn-card {
+    margin-top: 20rpx;
+    width: 300rpx;
+    height: 70rpx;
+    line-height: 70rpx;
+    background: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+    border-radius: 35rpx;
+    font-size: 28rpx;
+    border: 2rpx solid #FFFFFF;
 }
 
 .stats-card {

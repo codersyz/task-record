@@ -165,7 +165,7 @@ cp .env.example .env
 npm start
 ```
 
-后端服务将运行在 `http://localhost:3000`
+后端服务将运行在 `http://localhost:3003`
 
 ### 3. 前端配置
 
@@ -181,7 +181,7 @@ npm start
 
 ```javascript
 // taskuniapp/utils/request.js
-const baseURL = "http://192.168.x.x:3000/api"; // 替换为你的局域网IP
+const baseURL = "http://192.168.x.x:3003/api"; // 替换为你的局域网IP
 ```
 
 ### 4. 微信小程序配置

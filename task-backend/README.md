@@ -38,7 +38,7 @@ cp .env.example .env
 编辑 `.env` 文件：
 
 ```
-PORT=3000
+PORT=3003
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
@@ -198,7 +198,7 @@ server {
     server_name your-domain.com;
 
     location /api {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:3003;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

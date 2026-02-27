@@ -43,6 +43,32 @@
 	font-size: 28rpx;
 	color: #999999;
 }
+.guest-tip.data-v-1cf27b2a {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 20rpx;
+}
+.guest-text.data-v-1cf27b2a {
+	font-size: 32rpx;
+	color: #333333;
+	font-weight: bold;
+}
+.guest-desc.data-v-1cf27b2a {
+	font-size: 26rpx;
+	color: #666666;
+}
+.guest-login-btn.data-v-1cf27b2a {
+	margin-top: 20rpx;
+	width: 300rpx;
+	height: 70rpx;
+	line-height: 70rpx;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: #FFFFFF;
+	border-radius: 35rpx;
+	font-size: 28rpx;
+	border: none;
+}
 .task-item.data-v-1cf27b2a {
 	background: #FFFFFF;
 	border-radius: 16rpx;

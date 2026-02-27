@@ -20,7 +20,12 @@
 		<scroll-view class="task-scroll" scroll-y>
 			<view class="task-list">
 				<view v-if="taskList.length === 0" class="empty">
-					<text class="empty-text">暂无任务，点击下方按钮创建</text>
+					<text class="empty-text" v-if="!isGuestMode">暂无任务，点击下方按钮创建</text>
+					<view v-else class="guest-tip">
+						<text class="guest-text">👋 欢迎体验任务打卡</text>
+						<text class="guest-desc">登录后即可创建任务并开始打卡</text>
+						<button class="guest-login-btn" @click="goToLogin">立即登录</button>
+					</view>
 				</view>
 
 				<view v-for="task in taskList" :key="task.id" class="task-item" @click="goToDetail(task.id)">
@@ -76,32 +81,30 @@ export default {
 				total: 0,
 				active: 0,
 				totalCheckins: 0
-			}
+			},
+			isGuestMode: false
 		};
 	},
-	onShow() {
-		// 开发阶段：如果没有token，先不加载数据，但不强制跳转
+	onLoad() {
+		// 检查是否为游客模式
 		const token = uni.getStorageSync('token');
-		const userId = uni.getStorageSync('userId');
+		this.isGuestMode = !token;
+	},
+	onShow() {
+		const token = uni.getStorageSync('token');
+		const isGuestMode = uni.getStorageSync('isGuestMode');
 
 		console.log('=== 首页加载 ===');
 		console.log('Token:', token ? token.substring(0, 20) + '...' : '无');
-		console.log('UserId:', userId);
+		console.log('游客模式:', isGuestMode);
 
 		if (token) {
+			// 已登录，加载任务列表
 			this.loadTaskList();
 		} else {
-			// 提示用户需要登录
-			uni.showModal({
-				title: '提示',
-				content: '请先登录',
-				showCancel: false,
-				success: () => {
-					uni.reLaunch({
-						url: '/pages/login/login'
-					});
-				}
-			});
+			// 游客模式，显示空状态
+			this.taskList = [];
+			this.calculateStats();
 		}
 	},
 	methods: {
@@ -139,14 +142,49 @@ export default {
 		},
 
 		goToDetail(id) {
+			// 检查是否为游客模式
+			if (this.checkGuestMode()) return;
+
 			uni.navigateTo({
 				url: `/pages/task/detail?id=${id}`
 			});
 		},
 
 		goToCreate() {
+			// 检查是否为游客模式
+			if (this.checkGuestMode()) return;
+
 			uni.navigateTo({
 				url: '/pages/task/create'
+			});
+		},
+
+		// 检查游客模式
+		checkGuestMode() {
+			const token = uni.getStorageSync('token');
+			if (!token) {
+				uni.showModal({
+					title: '提示',
+					content: '请先登录后使用此功能',
+					confirmText: '去登录',
+					cancelText: '继续浏览',
+					success: (res) => {
+						if (res.confirm) {
+							uni.navigateTo({
+								url: '/pages/login/login'
+							});
+						}
+					}
+				});
+				return true;
+			}
+			return false;
+		},
+
+		// 跳转到登录页
+		goToLogin() {
+			uni.navigateTo({
+				url: '/pages/login/login'
 			});
 		},
 
@@ -217,6 +255,36 @@ export default {
 .empty-text {
 	font-size: 28rpx;
 	color: #999999;
+}
+
+.guest-tip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 20rpx;
+}
+
+.guest-text {
+	font-size: 32rpx;
+	color: #333333;
+	font-weight: bold;
+}
+
+.guest-desc {
+	font-size: 26rpx;
+	color: #666666;
+}
+
+.guest-login-btn {
+	margin-top: 20rpx;
+	width: 300rpx;
+	height: 70rpx;
+	line-height: 70rpx;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: #FFFFFF;
+	border-radius: 35rpx;
+	font-size: 28rpx;
+	border: none;
 }
 
 .task-item {

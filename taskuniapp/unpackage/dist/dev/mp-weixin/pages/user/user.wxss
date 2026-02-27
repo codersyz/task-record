@@ -47,6 +47,17 @@
     font-size: 24rpx;
     color: rgba(255, 255, 255, 0.9);
 }
+.guest-login-btn-card.data-v-0f7520f0 {
+    margin-top: 20rpx;
+    width: 300rpx;
+    height: 70rpx;
+    line-height: 70rpx;
+    background: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+    border-radius: 35rpx;
+    font-size: 28rpx;
+    border: 2rpx solid #FFFFFF;
+}
 .stats-card.data-v-0f7520f0 {
     background: #FFFFFF;
     margin: 20rpx;

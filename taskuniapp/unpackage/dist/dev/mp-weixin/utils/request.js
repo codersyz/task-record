@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://192.168.202.53:3000/api";
+const BASE_URL = "https://syztools.cn/task-api/api";
 const request = (options) => {
   return new Promise((resolve, reject) => {
     const token = common_vendor.index.getStorageSync("token");

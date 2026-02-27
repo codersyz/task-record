@@ -49,3 +49,13 @@
     font-size: 28rpx;
     border: 2rpx solid #FFFFFF;
 }
+.skip-btn.data-v-e4e4508d {
+    width: 500rpx;
+    height: 88rpx;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 44rpx;
+    font-size: 28rpx;
+    border: none;
+    margin-top: 20rpx;
+}

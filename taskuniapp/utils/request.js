@@ -1,6 +1,15 @@
 // API请求封装
-// 真机调试使用局域网IP，开发者工具使用localhost
-const BASE_URL = 'http://192.168.202.53:3000/api'; // 真机调试地址
+// 使用主域名 + 子路径方案
+
+// 开发环境：本地或局域网（开发时使用）
+// const BASE_URL = 'http://192.168.202.53:3003/api'; // 真机调试地址
+// const BASE_URL = 'http://localhost:3003/api'; // 开发者工具地址
+// const BASE_URL = 'http://43.142.65.192:3003/api'; // 服务器IP地址（临时测试）
+
+// 生产环境：HTTPS域名（正式发布使用）
+const BASE_URL = 'https://syztools.cn/task-api/api'; // 生产服务器地址
+
+// 注意：微信小程序正式发布必须使用HTTPS和已备案的域名
 
 // 请求拦截器
 const request = (options) => {

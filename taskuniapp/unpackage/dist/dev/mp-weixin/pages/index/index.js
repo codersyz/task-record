@@ -13,49 +13,46 @@ const _sfc_main = {
         total: 0,
         active: 0,
         totalCheckins: 0
-      }
+      },
+      isGuestMode: false
     };
+  },
+  onLoad() {
+    const token = common_vendor.index.getStorageSync("token");
+    this.isGuestMode = !token;
   },
   onShow() {
     const token = common_vendor.index.getStorageSync("token");
-    const userId = common_vendor.index.getStorageSync("userId");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:87", "=== 首页加载 ===");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:88", "Token:", token ? token.substring(0, 20) + "..." : "无");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:89", "UserId:", userId);
+    const isGuestMode = common_vendor.index.getStorageSync("isGuestMode");
+    common_vendor.index.__f__("log", "at pages/index/index.vue:97", "=== 首页加载 ===");
+    common_vendor.index.__f__("log", "at pages/index/index.vue:98", "Token:", token ? token.substring(0, 20) + "..." : "无");
+    common_vendor.index.__f__("log", "at pages/index/index.vue:99", "游客模式:", isGuestMode);
     if (token) {
       this.loadTaskList();
     } else {
-      common_vendor.index.showModal({
-        title: "提示",
-        content: "请先登录",
-        showCancel: false,
-        success: () => {
-          common_vendor.index.reLaunch({
-            url: "/pages/login/login"
-          });
-        }
-      });
+      this.taskList = [];
+      this.calculateStats();
     }
   },
   methods: {
     async loadTaskList() {
       try {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:110", "开始加载任务列表...");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:113", "开始加载任务列表...");
         const res = await api_task.getTaskList();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:112", "任务列表响应:", res);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:115", "任务列表响应:", res);
         if (res.code === 200) {
           this.taskList = res.data;
-          common_vendor.index.__f__("log", "at pages/index/index.vue:116", "任务列表数据:", this.taskList);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:119", "任务列表数据:", this.taskList);
           this.calculateStats();
         } else {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:119", "获取任务列表失败:", res);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:122", "获取任务列表失败:", res);
           common_vendor.index.showToast({
             title: res.message || "获取任务失败",
             icon: "none"
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:126", "加载任务列表错误:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:129", "加载任务列表错误:", error);
       }
     },
     calculateStats() {
@@ -69,13 +66,44 @@ const _sfc_main = {
       return Math.min(task.total_days / task.target_days * 100, 100);
     },
     goToDetail(id) {
+      if (this.checkGuestMode())
+        return;
       common_vendor.index.navigateTo({
         url: `/pages/task/detail?id=${id}`
       });
     },
     goToCreate() {
+      if (this.checkGuestMode())
+        return;
       common_vendor.index.navigateTo({
         url: "/pages/task/create"
+      });
+    },
+    // 检查游客模式
+    checkGuestMode() {
+      const token = common_vendor.index.getStorageSync("token");
+      if (!token) {
+        common_vendor.index.showModal({
+          title: "提示",
+          content: "请先登录后使用此功能",
+          confirmText: "去登录",
+          cancelText: "继续浏览",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.navigateTo({
+                url: "/pages/login/login"
+              });
+            }
+          }
+        });
+        return true;
+      }
+      return false;
+    },
+    // 跳转到登录页
+    goToLogin() {
+      common_vendor.index.navigateTo({
+        url: "/pages/login/login"
       });
     },
     getCategoryName(category) {
@@ -105,8 +133,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     b: common_vendor.t($data.taskStats.active),
     c: common_vendor.t($data.taskStats.totalCheckins),
     d: $data.taskList.length === 0
-  }, $data.taskList.length === 0 ? {} : {}, {
-    e: common_vendor.f($data.taskList, (task, k0, i0) => {
+  }, $data.taskList.length === 0 ? common_vendor.e({
+    e: !$data.isGuestMode
+  }, !$data.isGuestMode ? {} : {
+    f: common_vendor.o((...args) => $options.goToLogin && $options.goToLogin(...args))
+  }) : {}, {
+    g: common_vendor.f($data.taskList, (task, k0, i0) => {
       return common_vendor.e({
         a: common_vendor.t($options.getCategoryName(task.category)),
         b: common_vendor.n("category-" + task.category),
@@ -124,7 +156,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         l: common_vendor.o(($event) => $options.goToDetail(task.id), task.id)
       });
     }),
-    f: common_vendor.o((...args) => $options.goToCreate && $options.goToCreate(...args))
+    h: common_vendor.o((...args) => $options.goToCreate && $options.goToCreate(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-1cf27b2a"]]);

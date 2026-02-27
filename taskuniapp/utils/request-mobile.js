@@ -1,7 +1,8 @@
 // 真机调试专用配置
 // 使用方法：将此文件重命名为 request.js 即可切换到真机调试模式
 
-const BASE_URL = 'http://192.168.202.53:3000/api'; // 你的电脑局域网IP
+// const BASE_URL = 'http://192.168.202.53:3003/api'; // 你的电脑局域网IP
+const BASE_URL = 'https://syztools.cn/task-api/api'; // 生产服务器地址
 
 // 请求拦截器
 const request = (options) => {
