@@ -94,9 +94,12 @@ export default {
 		const token = uni.getStorageSync('token');
 		const isGuestMode = uni.getStorageSync('isGuestMode');
 
+		// 更新游客模式状态
+		this.isGuestMode = !token;
+
 		console.log('=== 首页加载 ===');
 		console.log('Token:', token ? token.substring(0, 20) + '...' : '无');
-		console.log('游客模式:', isGuestMode);
+		console.log('游客模式:', this.isGuestMode);
 
 		if (token) {
 			// 已登录，加载任务列表

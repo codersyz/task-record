@@ -32,7 +32,7 @@
                     </view>
 
                     <!-- 用户信息 -->
-                    <image class="user-avatar" :src="item.avatar_url || '/static/logo.webp'" mode="aspectFill"></image>
+                    <image class="user-avatar" :src="getAvatarUrl(item.avatar_url)" mode="aspectFill"></image>
 
                     <view class="user-info">
                         <text class="user-name">{{ item.nickname || '未设置昵称' }}</text>
@@ -52,6 +52,7 @@
 
 <script>
 import { getPointsRanking, getUserPoints } from '@/api/point';
+import { getAvatarUrl } from '@/utils/image';
 
 export default {
     data() {
@@ -68,6 +69,11 @@ export default {
         this.loadMyPoints();
     },
     methods: {
+        // 获取完整的头像URL
+        getAvatarUrl(avatarUrl) {
+            return getAvatarUrl(avatarUrl);
+        },
+
         async loadRanking() {
             try {
                 uni.showLoading({ title: '加载中...' });

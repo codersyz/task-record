@@ -8,7 +8,7 @@
             <view class="form-item">
                 <text class="label">头像</text>
                 <button class="avatar-wrapper" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
-                    <image class="avatar" :src="avatarUrl || '/static/logo.webp'" mode="aspectFill"></image>
+                    <image class="avatar" :src="getAvatarUrl(avatarUrl)" mode="aspectFill"></image>
                     <text class="avatar-tip">点击更换头像</text>
                 </button>
             </view>
@@ -36,14 +36,16 @@
 </template>
 
 <script>
-import { updateUserInfo } from '@/api/auth';
+import { updateUserInfo, getUserInfo } from '@/api/auth';
+import { getAvatarUrl } from '@/utils/image';
 
 export default {
     data() {
         return {
             avatarUrl: '',
             nickname: '',
-            fromLogin: false
+            fromLogin: false,
+            isLoading: true
         };
     },
     computed: {
@@ -53,8 +55,35 @@ export default {
     },
     onLoad(options) {
         this.fromLogin = options.fromLogin === 'true';
+        // 如果不是从登录页来的，加载现有用户信息
+        if (!this.fromLogin) {
+            this.loadUserInfo();
+        } else {
+            this.isLoading = false;
+        }
     },
     methods: {
+        // 加载用户信息
+        async loadUserInfo() {
+            try {
+                const res = await getUserInfo();
+                if (res.code === 200) {
+                    this.nickname = res.data.nickname || '';
+                    this.avatarUrl = res.data.avatar_url || '';
+                    console.log('加载用户信息:', res.data);
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        // 获取完整的头像URL
+        getAvatarUrl(avatarUrl) {
+            return getAvatarUrl(avatarUrl);
+        },
+
         // 选择头像
         onChooseAvatar(e) {
             console.log('选择头像:', e);
@@ -67,6 +96,46 @@ export default {
         onNicknameBlur(e) {
             console.log('昵称输入:', e.detail.value);
             this.nickname = e.detail.value;
+        },
+
+        // 上传头像到服务器
+        async uploadAvatar(tempFilePath) {
+            return new Promise((resolve, reject) => {
+                const token = uni.getStorageSync('token');
+
+                // 开发环境
+                // const baseURL = 'http://localhost:3003'; // 开发者工具
+                // const baseURL = 'http://192.168.202.53:3003'; // 真机调试
+
+                // 生产环境（发布时取消注释）
+                const baseURL = 'https://syztools.cn/task-api';
+
+                uni.uploadFile({
+                    url: `${baseURL}/api/auth/upload-avatar`,
+                    filePath: tempFilePath,
+                    name: 'avatar',
+                    header: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    success: (uploadRes) => {
+                        console.log('上传响应:', uploadRes);
+                        try {
+                            const data = JSON.parse(uploadRes.data);
+                            if (data.code === 200) {
+                                resolve(data.data.avatarUrl);
+                            } else {
+                                reject(new Error(data.message || '上传失败'));
+                            }
+                        } catch (e) {
+                            reject(new Error('解析响应失败'));
+                        }
+                    },
+                    fail: (error) => {
+                        console.error('上传失败:', error);
+                        reject(error);
+                    }
+                });
+            });
         },
 
         // 提交
@@ -84,18 +153,31 @@ export default {
                     title: '保存中...'
                 });
 
-                console.log('准备上传:', {
+                console.log('准备保存:', {
                     nickname: this.nickname,
                     avatarUrl: this.avatarUrl
                 });
 
-                // 如果有头像，先上传
+                // 如果有新选择的头像（临时路径），先上传到服务器
                 let finalAvatarUrl = this.avatarUrl;
-                if (this.avatarUrl && this.avatarUrl.startsWith('http://tmp/')) {
-                    // 临时文件，需要上传到服务器
-                    // 这里简化处理，直接使用临时URL
-                    // 生产环境应该上传到自己的服务器或云存储
-                    console.log('使用临时头像URL');
+                if (this.avatarUrl && (this.avatarUrl.startsWith('http://tmp/') || this.avatarUrl.startsWith('wxfile://'))) {
+                    try {
+                        console.log('上传临时头像到服务器...');
+                        finalAvatarUrl = await this.uploadAvatar(this.avatarUrl);
+                        console.log('头像上传成功:', finalAvatarUrl);
+                    } catch (uploadError) {
+                        console.error('头像上传失败:', uploadError);
+                        uni.hideLoading();
+                        uni.showToast({
+                            title: '头像上传失败',
+                            icon: 'none'
+                        });
+                        return;
+                    }
+                } else if (this.avatarUrl && this.avatarUrl.startsWith('/uploads/')) {
+                    // 如果是已经上传的头像路径，直接使用
+                    finalAvatarUrl = this.avatarUrl;
+                    console.log('使用已有头像:', finalAvatarUrl);
                 }
 
                 // 更新用户信息

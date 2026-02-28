@@ -1,0 +1,47 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 日志
+*.log
+logs/
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 编辑器
+.DS_Store
+.vscode/
+.idea/
+
+# 构建产物
+dist/
+build/
+*.tar.gz
+
+# 备份文件
+backups/
+*-backup-*/
+
+# 上传文件（不提交到仓库）
+task-backend/uploads/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# PM2
+.pm2/
+
+# 测试
+coverage/
+.nyc_output/
+
+# 部署配置（如果包含敏感信息）
+deploy.config.sh
+deploy-to-server.sh
+quick-deploy.sh
+

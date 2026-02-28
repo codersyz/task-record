@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const api_auth = require("../../api/auth.js");
 const api_task = require("../../api/task.js");
 const api_point = require("../../api/point.js");
+const utils_image = require("../../utils/image.js");
 const customTabbar = () => "../../components/custom-tabbar/custom-tabbar.js";
 const _sfc_main = {
   components: {
@@ -33,6 +34,10 @@ const _sfc_main = {
     }
   },
   methods: {
+    // 获取完整的头像URL
+    getAvatarUrl(avatarUrl) {
+      return utils_image.getAvatarUrl(avatarUrl);
+    },
     async loadUserInfo() {
       try {
         const res = await api_auth.getUserInfo();
@@ -40,7 +45,7 @@ const _sfc_main = {
           this.userInfo = res.data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:128", "加载用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:134", "加载用户信息失败:", error);
       }
     },
     async loadStats() {
@@ -53,7 +58,7 @@ const _sfc_main = {
           this.stats.maxStreak = Math.max(...tasks.map((t) => t.current_days), 0);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:142", "加载统计信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:148", "加载统计信息失败:", error);
       }
     },
     async loadPoints() {
@@ -63,7 +68,7 @@ const _sfc_main = {
           this.pointsInfo = res.data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:153", "加载积分信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:159", "加载积分信息失败:", error);
       }
     },
     // 编辑个人信息
@@ -172,7 +177,7 @@ if (!Math) {
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: $data.userInfo.avatar_url || "/static/logo.webp",
+    a: $options.getAvatarUrl($data.userInfo.avatar_url),
     b: !$data.isGuestMode
   }, !$data.isGuestMode ? {
     c: common_vendor.t($data.userInfo.nickname || "未设置昵称")

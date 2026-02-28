@@ -23,10 +23,11 @@ const _sfc_main = {
   },
   onShow() {
     const token = common_vendor.index.getStorageSync("token");
-    const isGuestMode = common_vendor.index.getStorageSync("isGuestMode");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:97", "=== 首页加载 ===");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:98", "Token:", token ? token.substring(0, 20) + "..." : "无");
-    common_vendor.index.__f__("log", "at pages/index/index.vue:99", "游客模式:", isGuestMode);
+    common_vendor.index.getStorageSync("isGuestMode");
+    this.isGuestMode = !token;
+    common_vendor.index.__f__("log", "at pages/index/index.vue:100", "=== 首页加载 ===");
+    common_vendor.index.__f__("log", "at pages/index/index.vue:101", "Token:", token ? token.substring(0, 20) + "..." : "无");
+    common_vendor.index.__f__("log", "at pages/index/index.vue:102", "游客模式:", this.isGuestMode);
     if (token) {
       this.loadTaskList();
     } else {
@@ -37,22 +38,22 @@ const _sfc_main = {
   methods: {
     async loadTaskList() {
       try {
-        common_vendor.index.__f__("log", "at pages/index/index.vue:113", "开始加载任务列表...");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:116", "开始加载任务列表...");
         const res = await api_task.getTaskList();
-        common_vendor.index.__f__("log", "at pages/index/index.vue:115", "任务列表响应:", res);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:118", "任务列表响应:", res);
         if (res.code === 200) {
           this.taskList = res.data;
-          common_vendor.index.__f__("log", "at pages/index/index.vue:119", "任务列表数据:", this.taskList);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:122", "任务列表数据:", this.taskList);
           this.calculateStats();
         } else {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:122", "获取任务列表失败:", res);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:125", "获取任务列表失败:", res);
           common_vendor.index.showToast({
             title: res.message || "获取任务失败",
             icon: "none"
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:129", "加载任务列表错误:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:132", "加载任务列表错误:", error);
       }
     },
     calculateStats() {

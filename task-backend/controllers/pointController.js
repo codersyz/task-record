@@ -253,34 +253,60 @@ exports.getPointsRanking = async (req, res) => {
     const { limit = 100 } = req.query;
     const userId = req.userId;
     
+    // 检查 users 表是否有 points 字段
+    const [columns] = await db.query(
+      `SHOW COLUMNS FROM users LIKE 'points'`
+    );
+    
+    if (columns.length === 0) {
+      // 如果没有 points 字段，返回空排行榜
+      return res.json({
+        code: 200,
+        data: {
+          ranking: [],
+          myRank: 0,
+          message: '积分系统尚未初始化，请先运行数据库迁移脚本'
+        }
+      });
+    }
+    
     // 获取排行榜
     const [ranking] = await db.query(
       `SELECT 
         u.id,
         u.nickname,
         u.avatar_url,
-        u.points,
-        u.consecutive_days
+        COALESCE(u.points, 0) as points,
+        COALESCE(u.consecutive_days, 0) as consecutive_days
        FROM users u
-       WHERE u.points > 0
-       ORDER BY u.points DESC, u.consecutive_days DESC
+       WHERE COALESCE(u.points, 0) > 0
+       ORDER BY COALESCE(u.points, 0) DESC, COALESCE(u.consecutive_days, 0) DESC
        LIMIT ?`,
       [parseInt(limit)]
     );
     
+    // 获取当前用户的积分
+    const [currentUser] = await db.query(
+      `SELECT COALESCE(points, 0) as points FROM users WHERE id = ?`,
+      [userId]
+    );
+    
+    const userPoints = currentUser[0]?.points || 0;
+    
     // 获取当前用户排名
     const [userRank] = await db.query(
-      `SELECT COUNT(*) + 1 as rank
+      `SELECT COUNT(*) + 1 as \`rank\`
        FROM users
-       WHERE points > (SELECT points FROM users WHERE id = ?)`,
-      [userId]
+       WHERE COALESCE(points, 0) > ?`,
+      [userPoints]
     );
     
     res.json({
       code: 200,
       data: {
         ranking,
-        myRank: userRank[0].rank
+        myRank: userRank[0].rank,
+        myPoints: userPoints
       }
     });
     
@@ -288,7 +314,7 @@ exports.getPointsRanking = async (req, res) => {
     console.error('获取排行榜失败:', error);
     res.status(500).json({
       code: 500,
-      message: '服务器错误'
+      message: '服务器错误: ' + error.message
     });
   }
 };

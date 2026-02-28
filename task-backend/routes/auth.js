@@ -17,14 +17,18 @@ if (process.env.NODE_ENV !== 'production') {
       let [users] = await db.query('SELECT * FROM users WHERE openid = ?', ['test-openid']);
       
       let userId;
+      let isNewUser = false;
+      
       if (users.length === 0) {
         const [result] = await db.query(
           'INSERT INTO users (openid, nickname, avatar_url) VALUES (?, ?, ?)',
           ['test-openid', '测试用户', '/static/logo.webp']
         );
         userId = result.insertId;
+        isNewUser = true;
       } else {
         userId = users[0].id;
+        isNewUser = false;
       }
       
       // 生成token
@@ -40,7 +44,7 @@ if (process.env.NODE_ENV !== 'production') {
         data: {
           token,
           userId,
-          isNewUser: users.length === 0
+          isNewUser
         }
       });
     } catch (error) {
@@ -58,5 +62,8 @@ router.put('/user', authMiddleware, authController.updateUserInfo);
 
 // 获取用户信息（需要认证）
 router.get('/user', authMiddleware, authController.getUserInfo);
+
+// 上传头像（需要认证）
+router.post('/upload-avatar', authMiddleware, authController.uploadAvatar);
 
 module.exports = router;

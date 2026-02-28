@@ -2,7 +2,7 @@
     <view class="container">
         <!-- 用户信息 -->
         <view class="user-card">
-            <image class="avatar" :src="userInfo.avatar_url || '/static/logo.webp'" mode="aspectFill"></image>
+            <image class="avatar" :src="getAvatarUrl(userInfo.avatar_url)" mode="aspectFill"></image>
             <text class="nickname" v-if="!isGuestMode">{{ userInfo.nickname || '未设置昵称' }}</text>
             <text class="nickname" v-else>游客模式</text>
 
@@ -87,6 +87,7 @@ import customTabbar from '@/components/custom-tabbar/custom-tabbar.vue';
 import { getUserInfo } from '@/api/auth';
 import { getTaskList } from '@/api/task';
 import { getUserPoints } from '@/api/point';
+import { getAvatarUrl } from '@/utils/image';
 
 export default {
     components: {
@@ -118,6 +119,11 @@ export default {
         }
     },
     methods: {
+        // 获取完整的头像URL
+        getAvatarUrl(avatarUrl) {
+            return getAvatarUrl(avatarUrl);
+        },
+
         async loadUserInfo() {
             try {
                 const res = await getUserInfo();

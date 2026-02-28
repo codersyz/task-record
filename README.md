@@ -16,7 +16,9 @@
 
 - ✅ 微信一键登录
 - ✅ 自定义头像和昵称（适配微信新规）
+- ✅ 头像上传到服务器（永久保存）
 - ✅ 个人信息管理
+- ✅ 游客模式浏览
 - ✅ 测试登录（开发环境）
 
 ### 任务管理
@@ -50,6 +52,7 @@
 - ✅ 积分明细查看
 - ✅ 积分排行榜（TOP 100）
 - ✅ 个人中心显示积分和连续天数
+- ✅ 头像正常显示（服务器存储）
 
 ### 数据统计
 
@@ -73,6 +76,7 @@
 - MySQL 8.0+
 - JWT 认证
 - axios
+- multer（文件上传）
 
 ## 项目结构
 
@@ -89,24 +93,36 @@
 │   │   │   └── detail.vue # 任务详情
 │   │   ├── checkin/       # 打卡页
 │   │   ├── calendar/      # 打卡日历
-│   │   └── achievement/   # 成就中心
+│   │   ├── achievement/   # 成就中心
+│   │   └── points/        # 积分相关
+│   │       ├── records.vue  # 积分明细
+│   │       ├── ranking.vue  # 积分排行榜
+│   │       └── shop.vue     # 积分商城
 │   ├── components/        # 组件
 │   │   └── custom-tabbar/ # 自定义 TabBar
 │   ├── api/               # API 接口
 │   ├── utils/             # 工具函数
+│   │   ├── request.js    # 请求封装
+│   │   ├── auth.js       # 认证工具
+│   │   └── image.js      # 图片工具（头像URL处理）
 │   └── static/            # 静态资源（图标字体）
 │
 ├── task-backend/           # 后端服务
 │   ├── controllers/       # 控制器
-│   │   ├── authController.js        # 认证相关
+│   │   ├── authController.js        # 认证相关（含头像上传）
 │   │   ├── taskController.js        # 任务管理
 │   │   ├── checkinController.js     # 打卡管理
-│   │   └── achievementController.js # 成就系统
+│   │   ├── achievementController.js # 成就系统
+│   │   └── pointController.js       # 积分系统
 │   ├── routes/            # 路由
 │   ├── middleware/        # 中间件（JWT 认证）
 │   ├── config/            # 配置
 │   │   ├── db.js         # 数据库连接
-│   │   └── database.sql  # 数据库结构
+│   │   ├── database.sql  # 数据库结构
+│   │   └── add-points-system.sql  # 积分系统更新
+│   ├── uploads/           # 上传文件目录
+│   │   └── avatars/      # 用户头像
+│   ├── check-points-system.js  # 积分系统检查脚本
 │   └── app.js            # 入口文件
 │
 ├── generate-token.js       # JWT token 生成工具
@@ -200,10 +216,11 @@ const baseURL = "http://192.168.x.x:3003/api"; // 替换为你的局域网IP
 
 #### 认证相关
 
-- `POST /api/auth/wechat-login` - 微信登录
+- `POST /api/auth/login` - 微信登录
 - `POST /api/auth/test-login` - 测试登录（开发用）
-- `GET /api/auth/userinfo` - 获取用户信息
-- `PUT /api/auth/userinfo` - 更新用户信息
+- `GET /api/auth/user` - 获取用户信息
+- `PUT /api/auth/user` - 更新用户信息
+- `POST /api/auth/upload-avatar` - 上传头像
 
 #### 任务管理
 
@@ -325,6 +342,29 @@ A: 目前积分主要用于排行榜展示。后续将上线积分商城，可�
 - 用户登录后跳转到个人信息编辑页完善信息
 - 可随时在个人中心修改头像和昵称
 
+### 头像存储方案
+
+为了解决微信临时文件路径（`wxfile://temp/`）在小程序重启后失效的问题，项目实现了头像上传功能：
+
+1. **前端**：用户选择头像后，自动上传到服务器
+2. **后端**：使用 multer 处理文件上传，保存到 `uploads/avatars/` 目录
+3. **数据库**：存储相对路径（如 `/uploads/avatars/avatar-xxx.jpeg`）
+4. **显示**：前端使用工具函数自动拼接完整 URL
+
+**工具函数**：`utils/image.js` 提供 `getAvatarUrl()` 方法，自动将相对路径转换为完整 URL。
+
+**使用示例**：
+
+```vue
+<image :src="getAvatarUrl(userInfo.avatar_url)" />
+```
+
+### 登录流程优化
+
+- **新用户**：首次登录后跳转到个人信息编辑页
+- **老用户**：直接跳转到首页
+- **游客模式**：支持游客浏览，登录后自动刷新状态
+
 ## 开发说明
 
 ### 真机调试
@@ -417,26 +457,85 @@ A: 目前积分主要用于排行榜展示。后续将上线积分商城，可�
 - 查看前端控制台是否有错误信息
 - 确认 API 路径正确（`/api/points`）
 
+### 8. 头像不显示或显示默认头像
+
+**问题原因**：微信临时文件路径（`wxfile://temp/`）在小程序重启后失效
+
+**解决方案**：
+
+1. 确保后端服务正在运行
+2. 在个人信息编辑页重新选择头像
+3. 保存后头像会自动上传到服务器
+4. 检查 `uploads/avatars/` 目录是否有写入权限
+
+**验证方法**：
+
+- 查看数据库中的 `avatar_url` 字段
+- 应该是 `/uploads/avatars/avatar-xxx.jpeg` 格式
+- 不应该是 `wxfile://temp/` 开头
+
+### 9. 积分排行榜报 500 错误
+
+**问题原因**：数据库缺少积分系统相关字段
+
+**解决方案**：
+
+```bash
+# 检查积分系统是否初始化
+cd task-backend
+node check-points-system.js
+
+# 如果未初始化，执行更新脚本
+mysql -u root -p task_checkin < config/add-points-system.sql
+```
+
 ## 测试工具
 
 项目提供了一些测试工具帮助开发和调试：
 
-### 测试积分系统数据库
+### 检查积分系统
 
 ```bash
 cd task-backend
-node test-points-system.js
+node check-points-system.js
 ```
 
-### 测试积分 API
+这个脚本会检查：
 
-```bash
-cd task-backend
-# 需要先在脚本中填入有效的 token
-node test-points-api.js
-```
+- users 表是否有积分相关字段
+- point_records 表是否存在
+- daily_checkin_log 表是否存在
 
 ## 部署说明
+
+### 一键部署到服务器
+
+项目提供了一键部署脚本，可以快速部署到服务器：
+
+```bash
+# 1. 配置服务器信息
+vim deploy.config.sh
+
+# 2. 给脚本添加执行权限
+chmod +x deploy-to-server.sh
+
+# 3. 执行部署
+./deploy-to-server.sh
+```
+
+**重要特性**：
+
+- 🛡️ 自动保护 uploads 目录（用户上传的头像不会被覆盖）
+- 📦 智能打包（排除 node_modules、.git 等）
+- 🔄 零停机部署（使用 PM2 平滑重启）
+- 💾 自动备份（每次部署前备份当前版本）
+- ✅ 健康检查（部署后自动测试接口）
+
+详细说明请查看 [DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md)
+
+### 手动部署
+
+详见 `task-backend/DEPLOYMENT.md`
 
 ### 后端部署
 
@@ -467,6 +566,17 @@ MIT
 开发于 2026年2月
 
 ## 更新日志
+
+### v1.4.0 (2026-02-28) 🆕
+
+- ✅ 新增头像上传功能（永久保存到服务器）
+- ✅ 修复头像显示问题（临时路径失效）
+- ✅ 优化登录流程（新用户/老用户区分）
+- ✅ 修复游客模式状态同步问题
+- ✅ 修复积分排行榜 SQL 语法错误
+- ✅ 优化个人信息编辑页（自动加载现有信息）
+- ✅ 新增图片工具函数（统一处理头像 URL）
+- ✅ 新增积分系统检查脚本
 
 ### v1.3.2 (2026-02-13)
 

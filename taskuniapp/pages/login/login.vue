@@ -51,11 +51,19 @@ export default {
                         icon: 'success'
                     });
 
-                    // 跳转到首页
+                    // 根据是否是新用户决定跳转
                     setTimeout(() => {
-                        uni.switchTab({
-                            url: '/pages/index/index'
-                        });
+                        if (res.data.isNewUser) {
+                            // 新用户，跳转到个人信息编辑页
+                            uni.navigateTo({
+                                url: '/pages/profile-edit?fromLogin=true'
+                            });
+                        } else {
+                            // 老用户，直接跳转到首页
+                            uni.switchTab({
+                                url: '/pages/index/index'
+                            });
+                        }
                     }, 1000);
                 }
             } catch (error) {
@@ -103,11 +111,19 @@ export default {
                                     icon: 'success'
                                 });
 
-                                // 跳转到个人信息编辑页
+                                // 根据是否是新用户决定跳转
                                 setTimeout(() => {
-                                    uni.navigateTo({
-                                        url: '/pages/profile-edit?fromLogin=true'
-                                    });
+                                    if (res.data.isNewUser) {
+                                        // 新用户，跳转到个人信息编辑页
+                                        uni.navigateTo({
+                                            url: '/pages/profile-edit?fromLogin=true'
+                                        });
+                                    } else {
+                                        // 老用户，直接跳转到首页
+                                        uni.switchTab({
+                                            url: '/pages/index/index'
+                                        });
+                                    }
                                 }, 1000);
                             }
                         } catch (error) {
