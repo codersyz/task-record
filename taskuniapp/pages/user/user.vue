@@ -63,6 +63,11 @@
                 <text class="menu-text">我的成就</text>
                 <text class="menu-arrow">›</text>
             </view>
+            <view class="menu-item" @click="goToReminderSettings">
+                <text class="menu-icon">🔔</text>
+                <text class="menu-text">提醒设置</text>
+                <text class="menu-arrow">›</text>
+            </view>
             <view class="menu-item" @click="editProfile">
                 <text class="menu-icon">✏️</text>
                 <text class="menu-text">编辑资料</text>
@@ -205,6 +210,14 @@ export default {
             if (this.checkGuestMode()) return;
             uni.navigateTo({
                 url: '/pages/points/ranking'
+            });
+        },
+
+        // 跳转到提醒设置
+        goToReminderSettings() {
+            if (this.checkGuestMode()) return;
+            uni.navigateTo({
+                url: '/pages/reminder-settings/reminder-settings'
             });
         },
 

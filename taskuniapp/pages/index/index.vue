@@ -1,5 +1,15 @@
 <template>
 	<view class="container">
+		<!-- 订阅状态提示 -->
+		<view v-if="!isGuestMode && !hasSubscription" class="subscription-tip" @click="goToReminderSettings">
+			<text class="tip-icon">🔔</text>
+			<view class="tip-content">
+				<text class="tip-title">开启打卡提醒</text>
+				<text class="tip-desc">订阅消息，每天准时提醒</text>
+			</view>
+			<text class="tip-arrow">›</text>
+		</view>
+
 		<!-- 顶部统计 - 固定 -->
 		<view class="stats-card">
 			<view class="stat-item">
@@ -19,13 +29,18 @@
 		<!-- 任务列表 - 可滚动 -->
 		<scroll-view class="task-scroll" scroll-y>
 			<view class="task-list">
-				<view v-if="taskList.length === 0" class="empty">
-					<text class="empty-text" v-if="!isGuestMode">暂无任务，点击下方按钮创建</text>
-					<view v-else class="guest-tip">
-						<text class="guest-text">👋 欢迎体验任务打卡</text>
-						<text class="guest-desc">登录后即可创建任务并开始打卡</text>
-						<button class="guest-login-btn" @click="goToLogin">立即登录</button>
+				<!-- 游客模式提示 -->
+				<view v-if="isGuestMode" class="guest-banner">
+					<text class="banner-icon">👋</text>
+					<view class="banner-content">
+						<text class="banner-title">欢迎体验任务打卡</text>
+						<text class="banner-desc">以下是示例任务，登录后可创建自己的任务</text>
 					</view>
+					<button class="banner-btn" @click="goToLogin">登录</button>
+				</view>
+
+				<view v-if="taskList.length === 0 && !isGuestMode" class="empty">
+					<text class="empty-text">暂无任务，点击下方按钮创建</text>
 				</view>
 
 				<view v-for="task in taskList" :key="task.id" class="task-item" @click="goToDetail(task.id)">
@@ -69,6 +84,7 @@
 <script>
 import customTabbar from '@/components/custom-tabbar/custom-tabbar.vue';
 import { getTaskList } from '@/api/task';
+import { getSubscriptionStatus } from '@/api/subscription';
 
 export default {
 	components: {
@@ -82,7 +98,38 @@ export default {
 				active: 0,
 				totalCheckins: 0
 			},
-			isGuestMode: false
+			isGuestMode: false,
+			hasSubscription: false,
+			// 示例任务数据（游客模式展示）
+			demoTasks: [
+				{
+					id: 'demo1',
+					title: '每天阅读30分钟',
+					category: 'read',
+					status: 1,
+					current_days: 7,
+					total_days: 15,
+					target_days: 30
+				},
+				{
+					id: 'demo2',
+					title: '坚持晨跑',
+					category: 'sport',
+					status: 1,
+					current_days: 3,
+					total_days: 10,
+					target_days: 21
+				},
+				{
+					id: 'demo3',
+					title: '学习英语单词',
+					category: 'study',
+					status: 1,
+					current_days: 12,
+					total_days: 25,
+					target_days: 100
+				}
+			]
 		};
 	},
 	onLoad() {
@@ -102,11 +149,12 @@ export default {
 		console.log('游客模式:', this.isGuestMode);
 
 		if (token) {
-			// 已登录，加载任务列表
+			// 已登录，加载任务列表和订阅状态
 			this.loadTaskList();
+			this.checkSubscriptionStatus();
 		} else {
-			// 游客模式，显示空状态
-			this.taskList = [];
+			// 游客模式，显示示例任务
+			this.taskList = this.demoTasks;
 			this.calculateStats();
 		}
 	},
@@ -133,6 +181,18 @@ export default {
 			}
 		},
 
+		// 检查订阅状态
+		async checkSubscriptionStatus() {
+			try {
+				const res = await getSubscriptionStatus('daily_reminder');
+				if (res.code === 200) {
+					this.hasSubscription = res.data.hasSubscription;
+				}
+			} catch (error) {
+				console.error('检查订阅状态失败:', error);
+			}
+		},
+
 		calculateStats() {
 			this.taskStats.total = this.taskList.length;
 			this.taskStats.active = this.taskList.filter(t => t.status === 1).length;
@@ -145,31 +205,12 @@ export default {
 		},
 
 		goToDetail(id) {
-			// 检查是否为游客模式
-			if (this.checkGuestMode()) return;
-
-			uni.navigateTo({
-				url: `/pages/task/detail?id=${id}`
-			});
-		},
-
-		goToCreate() {
-			// 检查是否为游客模式
-			if (this.checkGuestMode()) return;
-
-			uni.navigateTo({
-				url: '/pages/task/create'
-			});
-		},
-
-		// 检查游客模式
-		checkGuestMode() {
-			const token = uni.getStorageSync('token');
-			if (!token) {
+			// 游客模式下点击示例任务，提示登录
+			if (this.isGuestMode) {
 				uni.showModal({
-					title: '提示',
-					content: '请先登录后使用此功能',
-					confirmText: '去登录',
+					title: '体验示例',
+					content: '这是示例任务，登录后可以创建自己的任务并开始打卡',
+					confirmText: '立即登录',
 					cancelText: '继续浏览',
 					success: (res) => {
 						if (res.confirm) {
@@ -179,15 +220,49 @@ export default {
 						}
 					}
 				});
-				return true;
+				return;
 			}
-			return false;
+
+			uni.navigateTo({
+				url: `/pages/task/detail?id=${id}`
+			});
+		},
+
+		goToCreate() {
+			// 游客模式下提示登录
+			if (this.isGuestMode) {
+				uni.showModal({
+					title: '需要登录',
+					content: '登录后即可创建任务并开始打卡',
+					confirmText: '立即登录',
+					cancelText: '继续浏览',
+					success: (res) => {
+						if (res.confirm) {
+							uni.navigateTo({
+								url: '/pages/login/login'
+							});
+						}
+					}
+				});
+				return;
+			}
+
+			uni.navigateTo({
+				url: '/pages/task/create'
+			});
 		},
 
 		// 跳转到登录页
 		goToLogin() {
 			uni.navigateTo({
 				url: '/pages/login/login'
+			});
+		},
+
+		// 跳转到提醒设置
+		goToReminderSettings() {
+			uni.navigateTo({
+				url: '/pages/reminder-settings/reminder-settings'
 			});
 		},
 
@@ -212,6 +287,43 @@ export default {
 	display: flex;
 	flex-direction: column;
 	background: #F5F5F5;
+}
+
+.subscription-tip {
+	background: linear-gradient(135deg, #FFB75E 0%, #ED8F03 100%);
+	padding: 20rpx 30rpx;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.tip-icon {
+	font-size: 40rpx;
+	margin-right: 20rpx;
+}
+
+.tip-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.tip-title {
+	font-size: 28rpx;
+	color: #FFFFFF;
+	font-weight: bold;
+	margin-bottom: 5rpx;
+}
+
+.tip-desc {
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.tip-arrow {
+	font-size: 40rpx;
+	color: #FFFFFF;
+	font-weight: bold;
 }
 
 .stats-card {
@@ -258,6 +370,50 @@ export default {
 .empty-text {
 	font-size: 28rpx;
 	color: #999999;
+}
+
+.guest-banner {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 16rpx;
+	padding: 30rpx;
+	margin-bottom: 20rpx;
+	display: flex;
+	align-items: center;
+	gap: 20rpx;
+}
+
+.banner-icon {
+	font-size: 48rpx;
+}
+
+.banner-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8rpx;
+}
+
+.banner-title {
+	font-size: 30rpx;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+
+.banner-desc {
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-btn {
+	width: 120rpx;
+	height: 60rpx;
+	line-height: 60rpx;
+	background: #FFFFFF;
+	color: #667eea;
+	border-radius: 30rpx;
+	font-size: 26rpx;
+	padding: 0;
+	border: none;
 }
 
 .guest-tip {

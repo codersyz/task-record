@@ -17,6 +17,7 @@
 
 <script>
 import { checkin } from '@/api/task';
+import { recordSubscription, getSubscriptionStatus } from '@/api/subscription';
 
 export default {
     data() {
@@ -24,7 +25,9 @@ export default {
             taskId: 0,
             note: '',
             loading: false,
-            hasCheckedToday: false
+            hasCheckedToday: false,
+            // 模板ID - 需要在微信公众平台配置后替换
+            templateId: 'ezyMyEq365A0q4W9oja0NWXIssOZxxUVkO38m_FyM_g'
         };
     },
     onLoad(options) {
@@ -86,7 +89,8 @@ export default {
                                 if (res.data.newAchievements && res.data.newAchievements.length > 0) {
                                     this.showNewAchievements(res.data.newAchievements);
                                 } else {
-                                    uni.navigateBack();
+                                    // 打卡成功后提示订阅
+                                    this.promptSubscribe();
                                 }
                             }
                         });
@@ -102,7 +106,8 @@ export default {
                                     if (res.data.newAchievements && res.data.newAchievements.length > 0) {
                                         this.showNewAchievements(res.data.newAchievements);
                                     } else {
-                                        uni.navigateBack();
+                                        // 打卡成功后提示订阅
+                                        this.promptSubscribe();
                                     }
                                 }
                             });
@@ -117,7 +122,8 @@ export default {
                                 if (res.data.newAchievements && res.data.newAchievements.length > 0) {
                                     this.showNewAchievements(res.data.newAchievements);
                                 } else {
-                                    uni.navigateBack();
+                                    // 打卡成功后提示订阅
+                                    this.promptSubscribe();
                                 }
                             }, 1500);
                         }
@@ -163,10 +169,72 @@ export default {
                             url: '/pages/achievement/achievement'
                         });
                     } else {
-                        uni.navigateBack();
+                        // 查看成就后也提示订阅
+                        this.promptSubscribe();
                     }
                 }
             });
+        },
+
+        // 提示订阅消息
+        async promptSubscribe() {
+            // 先检查用户是否已有有效订阅
+            try {
+                const statusRes = await getSubscriptionStatus('daily_reminder');
+                if (statusRes.code === 200 && statusRes.data.hasSubscription) {
+                    // 已有有效订阅，不再提示
+                    console.log('用户已订阅，跳过提示');
+                    uni.navigateBack();
+                    return;
+                }
+            } catch (error) {
+                console.error('检查订阅状态失败:', error);
+            }
+
+            // 没有订阅或订阅已失效，提示用户订阅
+            uni.showModal({
+                title: '💡 温馨提示',
+                content: '订阅消息提醒，每天准时打卡不遗漏',
+                confirmText: '立即订阅',
+                cancelText: '下次再说',
+                success: async (res) => {
+                    if (res.confirm) {
+                        await this.requestSubscribe();
+                    }
+                    uni.navigateBack();
+                }
+            });
+        },
+
+        // 请求订阅
+        async requestSubscribe() {
+            try {
+                const res = await uni.requestSubscribeMessage({
+                    tmplIds: [this.templateId]
+                });
+
+                console.log('订阅结果:', res);
+
+                if (res[this.templateId] === 'accept') {
+                    // 记录订阅
+                    await recordSubscription({
+                        templateId: this.templateId,
+                        templateType: 'daily_reminder'
+                    });
+
+                    uni.showToast({
+                        title: '订阅成功',
+                        icon: 'success'
+                    });
+                } else if (res[this.templateId] === 'reject') {
+                    uni.showToast({
+                        title: '您拒绝了订阅',
+                        icon: 'none'
+                    });
+                }
+            } catch (error) {
+                console.error('订阅失败:', error);
+            }
         }
     }
 };

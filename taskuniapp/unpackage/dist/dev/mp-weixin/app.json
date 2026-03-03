@@ -11,7 +11,8 @@
     "pages/task/create",
     "pages/task/detail",
     "pages/checkin/checkin",
-    "pages/user/user"
+    "pages/user/user",
+    "pages/reminder-settings/reminder-settings"
   ],
   "window": {
     "navigationBarTextStyle": "black",

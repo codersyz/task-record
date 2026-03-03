@@ -49,13 +49,21 @@
     font-size: 28rpx;
     border: 2rpx solid #FFFFFF;
 }
+.privacy-tip.data-v-e4e4508d {
+    margin-top: 20rpx;
+    margin-bottom: 10rpx;
+}
+.privacy-tip text.data-v-e4e4508d {
+    font-size: 22rpx;
+    color: rgba(255, 255, 255, 0.7);
+}
 .skip-btn.data-v-e4e4508d {
     width: 500rpx;
     height: 88rpx;
     background: transparent;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.9);
     border-radius: 44rpx;
-    font-size: 28rpx;
-    border: none;
-    margin-top: 20rpx;
+    font-size: 30rpx;
+    border: 2rpx solid rgba(255, 255, 255, 0.5);
+    margin-top: 40rpx;
 }

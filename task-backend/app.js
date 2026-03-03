@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cron = require('node-cron');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/checkins', require('./routes/checkins'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/points', require('./routes/points'));
+app.use('/api/subscription', require('./routes/subscription'));
 
 // 健康检查
 app.get('/health', (req, res) => {
@@ -47,6 +49,18 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 服务器运行在 http://localhost:${PORT}`);
   console.log(`📱 真机调试地址: http://192.168.202.53:${PORT}`);
   console.log(`📝 API文档: http://localhost:${PORT}/health`);
+  
+  // 启动定时任务 - 每分钟检查一次是否需要发送提醒
+  console.log('⏰ 启动定时任务：每日打卡提醒');
+  const subscriptionController = require('./controllers/subscriptionController');
+  
+  cron.schedule('* * * * *', async () => {
+    try {
+      await subscriptionController.sendDailyReminders();
+    } catch (error) {
+      console.error('定时任务执行失败:', error);
+    }
+  });
 });
 
 module.exports = app;

@@ -14,20 +14,17 @@ if (!Math) {
   "./pages/task/detail.js";
   "./pages/checkin/checkin.js";
   "./pages/user/user.js";
+  "./pages/reminder-settings/reminder-settings.js";
 }
 const _sfc_main = {
   onLaunch: function() {
     common_vendor.index.__f__("log", "at App.vue:4", "App Launch");
-    const token = common_vendor.index.getStorageSync("token");
-    if (!token) {
-      common_vendor.index.setStorageSync("isGuestMode", true);
-    }
   },
   onShow: function() {
-    common_vendor.index.__f__("log", "at App.vue:13", "App Show");
+    common_vendor.index.__f__("log", "at App.vue:8", "App Show");
   },
   onHide: function() {
-    common_vendor.index.__f__("log", "at App.vue:16", "App Hide");
+    common_vendor.index.__f__("log", "at App.vue:11", "App Hide");
   }
 };
 function createApp() {

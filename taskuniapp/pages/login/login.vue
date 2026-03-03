@@ -9,8 +9,12 @@
                 微信一键登录
             </button>
 
+            <!-- <view class="privacy-tip">
+                <text>登录即表示同意用户协议和隐私政策</text>
+            </view> -->
+
             <button class="skip-btn" @click="skipLogin">
-                跳过，以游客身份浏览
+                暂不登录，先看看
             </button>
 
             <!-- 开发环境：测试登录按钮 -->
@@ -79,6 +83,25 @@ export default {
         },
 
         async handleLogin() {
+            // 先弹出确认对话框
+            uni.showModal({
+                title: '登录确认',
+                content: '登录后可以创建任务、打卡并记录您的进度。是否继续？',
+                confirmText: '确认登录',
+                cancelText: '取消',
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        // 用户确认登录
+                        this.performLogin();
+                    } else {
+                        // 用户取消登录
+                        console.log('用户取消登录');
+                    }
+                }
+            });
+        },
+
+        async performLogin() {
             this.loading = true;
 
             try {
@@ -190,9 +213,16 @@ export default {
         // 跳过登录，以游客身份浏览
         skipLogin() {
             uni.setStorageSync('isGuestMode', true);
-            uni.switchTab({
-                url: '/pages/index/index'
+            uni.showToast({
+                title: '进入浏览模式',
+                icon: 'none',
+                duration: 1500
             });
+            setTimeout(() => {
+                uni.switchTab({
+                    url: '/pages/index/index'
+                });
+            }, 1500);
         }
     }
 };
@@ -256,14 +286,24 @@ export default {
     border: 2rpx solid #FFFFFF;
 }
 
+.privacy-tip {
+    margin-top: 20rpx;
+    margin-bottom: 10rpx;
+}
+
+.privacy-tip text {
+    font-size: 22rpx;
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .skip-btn {
     width: 500rpx;
     height: 88rpx;
     background: transparent;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.9);
     border-radius: 44rpx;
-    font-size: 28rpx;
-    border: none;
-    margin-top: 20rpx;
+    font-size: 30rpx;
+    border: 2rpx solid rgba(255, 255, 255, 0.5);
+    margin-top: 40rpx;
 }
 </style>

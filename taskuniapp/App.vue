@@ -2,12 +2,7 @@
 export default {
 	onLaunch: function () {
 		console.log('App Launch')
-		// 初始化游客模式标识
-		const token = uni.getStorageSync('token');
-		if (!token) {
-			// 设置游客模式
-			uni.setStorageSync('isGuestMode', true);
-		}
+		// 不再自动设置游客模式，让用户自然进入首页体验
 	},
 	onShow: function () {
 		console.log('App Show')

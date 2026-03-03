@@ -45,7 +45,7 @@ const _sfc_main = {
           this.userInfo = res.data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:134", "加载用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:139", "加载用户信息失败:", error);
       }
     },
     async loadStats() {
@@ -58,7 +58,7 @@ const _sfc_main = {
           this.stats.maxStreak = Math.max(...tasks.map((t) => t.current_days), 0);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:148", "加载统计信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:153", "加载统计信息失败:", error);
       }
     },
     async loadPoints() {
@@ -68,7 +68,7 @@ const _sfc_main = {
           this.pointsInfo = res.data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:159", "加载积分信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:164", "加载积分信息失败:", error);
       }
     },
     // 编辑个人信息
@@ -117,6 +117,14 @@ const _sfc_main = {
         return;
       common_vendor.index.navigateTo({
         url: "/pages/points/ranking"
+      });
+    },
+    // 跳转到提醒设置
+    goToReminderSettings() {
+      if (this.checkGuestMode())
+        return;
+      common_vendor.index.navigateTo({
+        url: "/pages/reminder-settings/reminder-settings"
       });
     },
     // 检查游客模式
@@ -200,12 +208,13 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     n: common_vendor.o((...args) => $options.goToRanking && $options.goToRanking(...args)),
     o: common_vendor.o((...args) => $options.goToCalendar && $options.goToCalendar(...args)),
     p: common_vendor.o((...args) => $options.goToAchievement && $options.goToAchievement(...args)),
-    q: common_vendor.o((...args) => $options.editProfile && $options.editProfile(...args)),
-    r: !$data.isGuestMode
-  }, !$data.isGuestMode ? {} : {}, {
+    q: common_vendor.o((...args) => $options.goToReminderSettings && $options.goToReminderSettings(...args)),
+    r: common_vendor.o((...args) => $options.editProfile && $options.editProfile(...args)),
     s: !$data.isGuestMode
   }, !$data.isGuestMode ? {} : {}, {
-    t: common_vendor.o((...args) => $options.handleLogout && $options.handleLogout(...args))
+    t: !$data.isGuestMode
+  }, !$data.isGuestMode ? {} : {}, {
+    v: common_vendor.o((...args) => $options.handleLogout && $options.handleLogout(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-0f7520f0"]]);

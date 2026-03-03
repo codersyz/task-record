@@ -36,7 +36,7 @@ const _sfc_main = {
           }, 1e3);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/login/login.vue:70", "测试登录失败:", error);
+        common_vendor.index.__f__("error", "at pages/login/login.vue:74", "测试登录失败:", error);
         common_vendor.index.showToast({
           title: "登录失败，请检查后端服务",
           icon: "none",
@@ -47,6 +47,21 @@ const _sfc_main = {
       }
     },
     async handleLogin() {
+      common_vendor.index.showModal({
+        title: "登录确认",
+        content: "登录后可以创建任务、打卡并记录您的进度。是否继续？",
+        confirmText: "确认登录",
+        cancelText: "取消",
+        success: (modalRes) => {
+          if (modalRes.confirm) {
+            this.performLogin();
+          } else {
+            common_vendor.index.__f__("log", "at pages/login/login.vue:98", "用户取消登录");
+          }
+        }
+      });
+    },
+    async performLogin() {
       this.loading = true;
       try {
         common_vendor.index.login({
@@ -83,7 +98,7 @@ const _sfc_main = {
                 }, 1e3);
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/login/login.vue:130", "后端登录失败:", error);
+              common_vendor.index.__f__("error", "at pages/login/login.vue:153", "后端登录失败:", error);
               common_vendor.index.showToast({
                 title: error.message || "登录失败",
                 icon: "none"
@@ -93,7 +108,7 @@ const _sfc_main = {
             }
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/login/login.vue:140", "微信登录失败:", error);
+            common_vendor.index.__f__("error", "at pages/login/login.vue:163", "微信登录失败:", error);
             common_vendor.index.showToast({
               title: "微信登录失败",
               icon: "none"
@@ -102,7 +117,7 @@ const _sfc_main = {
           }
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/login/login.vue:149", "登录错误:", error);
+        common_vendor.index.__f__("error", "at pages/login/login.vue:172", "登录错误:", error);
         common_vendor.index.showToast({
           title: "登录失败",
           icon: "none"
@@ -116,22 +131,22 @@ const _sfc_main = {
         common_vendor.index.getUserProfile({
           desc: "用于完善用户资料",
           success: async (userInfoRes) => {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:164", "获取到用户信息:", userInfoRes.userInfo);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:187", "获取到用户信息:", userInfoRes.userInfo);
             try {
               const { nickName, avatarUrl } = userInfoRes.userInfo;
               await api_auth.updateUserInfo({
                 nickname: nickName,
                 avatarUrl
               });
-              common_vendor.index.__f__("log", "at pages/login/login.vue:175", "用户信息已更新到服务器");
+              common_vendor.index.__f__("log", "at pages/login/login.vue:198", "用户信息已更新到服务器");
               resolve();
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/login/login.vue:178", "更新用户信息失败:", error);
+              common_vendor.index.__f__("error", "at pages/login/login.vue:201", "更新用户信息失败:", error);
               resolve();
             }
           },
           fail: (error) => {
-            common_vendor.index.__f__("log", "at pages/login/login.vue:183", "用户拒绝授权或获取失败:", error);
+            common_vendor.index.__f__("log", "at pages/login/login.vue:206", "用户拒绝授权或获取失败:", error);
             resolve();
           }
         });
@@ -140,9 +155,16 @@ const _sfc_main = {
     // 跳过登录，以游客身份浏览
     skipLogin() {
       common_vendor.index.setStorageSync("isGuestMode", true);
-      common_vendor.index.switchTab({
-        url: "/pages/index/index"
+      common_vendor.index.showToast({
+        title: "进入浏览模式",
+        icon: "none",
+        duration: 1500
       });
+      setTimeout(() => {
+        common_vendor.index.switchTab({
+          url: "/pages/index/index"
+        });
+      }, 1500);
     }
   }
 };
