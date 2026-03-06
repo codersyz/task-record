@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const axios = require('axios');
 
-// 获取微信 access_token（带缓存）
+// 获取微信 access_token（带缓存，使用稳定版API）
 let accessTokenCache = {
   token: null,
   expiresAt: 0
@@ -10,31 +10,60 @@ let accessTokenCache = {
 async function getAccessToken() {
   // 如果缓存有效，直接返回
   if (accessTokenCache.token && Date.now() < accessTokenCache.expiresAt) {
+    console.log('使用缓存的access_token');
     return accessTokenCache.token;
   }
 
   try {
-    const response = await axios.get(
-      `https://api.weixin.qq.com/cgi-bin/token`,
+    console.log('重新获取access_token...');
+    // 优先使用稳定版API
+    const response = await axios.post(
+      `https://api.weixin.qq.com/cgi-bin/stable_token`,
       {
-        params: {
-          grant_type: 'client_credential',
-          appid: process.env.WECHAT_APPID,
-          secret: process.env.WECHAT_SECRET
-        }
+        grant_type: 'client_credential',
+        appid: process.env.WECHAT_APPID,
+        secret: process.env.WECHAT_SECRET,
+        force_refresh: false
       }
     );
 
     if (response.data.access_token) {
       accessTokenCache.token = response.data.access_token;
-      // 提前5分钟过期，避免边界问题
-      accessTokenCache.expiresAt = Date.now() + (response.data.expires_in - 300) * 1000;
+      // 提前10分钟过期，避免边界问题
+      accessTokenCache.expiresAt = Date.now() + (response.data.expires_in - 600) * 1000;
+      console.log('access_token获取成功（稳定版），有效期:', response.data.expires_in, '秒');
       return accessTokenCache.token;
     }
 
     throw new Error('获取access_token失败');
   } catch (error) {
-    console.error('获取access_token错误:', error.message);
+    console.error('稳定版API获取access_token错误:', error.message);
+    
+    // 如果稳定版API失败，回退到普通API
+    try {
+      console.log('尝试使用普通API获取access_token...');
+      const response = await axios.get(
+        `https://api.weixin.qq.com/cgi-bin/token`,
+        {
+          params: {
+            grant_type: 'client_credential',
+            appid: process.env.WECHAT_APPID,
+            secret: process.env.WECHAT_SECRET
+          }
+        }
+      );
+
+      if (response.data.access_token) {
+        accessTokenCache.token = response.data.access_token;
+        // 提前10分钟过期，避免边界问题
+        accessTokenCache.expiresAt = Date.now() + (response.data.expires_in - 600) * 1000;
+        console.log('access_token获取成功（普通版），有效期:', response.data.expires_in, '秒');
+        return accessTokenCache.token;
+      }
+    } catch (fallbackError) {
+      console.error('普通API也失败:', fallbackError.message);
+    }
+    
     throw error;
   }
 }

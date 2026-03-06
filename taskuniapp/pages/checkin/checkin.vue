@@ -227,10 +227,24 @@ export default {
                         icon: 'success'
                     });
                 } else if (res[this.templateId] === 'reject') {
-                    uni.showToast({
-                        title: '您拒绝了订阅',
-                        icon: 'none'
-                    });
+                    // 用户拒绝了订阅，给出详细说明
+                    setTimeout(() => {
+                        uni.showModal({
+                            title: '订阅提示',
+                            content: '您拒绝了订阅授权，将无法收到打卡提醒。\n\n如需开启提醒，请前往"我的-提醒设置"重新订阅。',
+                            showCancel: false,
+                            confirmText: '我知道了'
+                        });
+                    }, 500);
+                } else if (res[this.templateId] === 'ban') {
+                    setTimeout(() => {
+                        uni.showModal({
+                            title: '订阅受限',
+                            content: '您已被限制订阅该消息。请在微信"设置-通知-订阅消息"中重置权限。',
+                            showCancel: false,
+                            confirmText: '我知道了'
+                        });
+                    }, 500);
                 }
             } catch (error) {
                 console.error('订阅失败:', error);

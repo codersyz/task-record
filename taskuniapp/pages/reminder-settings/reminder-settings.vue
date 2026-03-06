@@ -135,38 +135,64 @@ export default {
                 return;
             }
 
-            try {
-                const res = await uni.requestSubscribeMessage({
-                    tmplIds: [this.templateId]
-                });
+            // 先显示说明
+            uni.showModal({
+                title: '订阅消息授权',
+                content: '为了及时提醒您打卡，需要您授权订阅消息。\n\n请在弹出的授权框中点击"允许"。\n\n注意：每次授权只能发送一次提醒，发送后需要重新订阅。',
+                confirmText: '去授权',
+                cancelText: '取消',
+                success: async (modalRes) => {
+                    if (!modalRes.confirm) {
+                        return;
+                    }
 
-                console.log('订阅结果:', res);
+                    try {
+                        const res = await uni.requestSubscribeMessage({
+                            tmplIds: [this.templateId]
+                        });
 
-                if (res[this.templateId] === 'accept') {
-                    // 记录订阅
-                    await recordSubscription({
-                        templateId: this.templateId,
-                        templateType: 'daily_reminder'
-                    });
+                        console.log('订阅结果:', res);
 
-                    this.hasSubscription = true;
-                    uni.showToast({
-                        title: '订阅成功',
-                        icon: 'success'
-                    });
-                } else if (res[this.templateId] === 'reject') {
-                    uni.showToast({
-                        title: '您拒绝了订阅',
-                        icon: 'none'
-                    });
+                        if (res[this.templateId] === 'accept') {
+                            // 记录订阅
+                            await recordSubscription({
+                                templateId: this.templateId,
+                                templateType: 'daily_reminder'
+                            });
+
+                            this.hasSubscription = true;
+                            uni.showToast({
+                                title: '订阅成功',
+                                icon: 'success'
+                            });
+                        } else if (res[this.templateId] === 'reject') {
+                            // 用户拒绝了订阅
+                            uni.showModal({
+                                title: '订阅失败',
+                                content: '您拒绝了订阅授权。\n\n如需接收提醒，请按以下步骤操作：\n1. 打开微信"我-设置-通知-订阅消息"\n2. 找到本小程序并开启权限\n3. 返回小程序重新订阅',
+                                showCancel: false,
+                                confirmText: '我知道了'
+                            });
+                        } else if (res[this.templateId] === 'ban') {
+                            // 用户被禁止订阅
+                            uni.showModal({
+                                title: '无法订阅',
+                                content: '您已被限制订阅该消息。\n\n可能原因：\n1. 多次拒绝订阅\n2. 在微信设置中关闭了权限\n\n请在微信"设置-通知-订阅消息"中重置权限后重试。',
+                                showCancel: false,
+                                confirmText: '我知道了'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('订阅失败:', error);
+                        uni.showModal({
+                            title: '订阅失败',
+                            content: '订阅过程出现错误，请稍后重试。\n\n如果问题持续存在，请检查：\n1. 网络连接是否正常\n2. 小程序版本是否最新\n3. 微信版本是否支持订阅消息',
+                            showCancel: false,
+                            confirmText: '我知道了'
+                        });
+                    }
                 }
-            } catch (error) {
-                console.error('订阅失败:', error);
-                uni.showToast({
-                    title: '订阅失败',
-                    icon: 'none'
-                });
-            }
+            });
         },
 
         // 每日提醒开关

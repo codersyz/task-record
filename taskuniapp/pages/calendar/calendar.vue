@@ -41,7 +41,8 @@
                 <view v-for="(day, index) in calendarDays" :key="index" class="day-cell" :class="{
                     'other-month': !day.isCurrentMonth,
                     'today': day.isToday,
-                    'has-checkin': day.hasCheckin
+                    'has-checkin': day.hasCheckin,
+                    'selected': day.date === selectedDateStr
                 }" @click="selectDate(day)">
                     <text class="day-num">{{ day.day }}</text>
                     <view v-if="day.hasCheckin" class="checkin-dot">
@@ -85,6 +86,7 @@ export default {
             calendarDays: [],
             checkinData: {},
             selectedDate: null,
+            selectedDateStr: null, // 用于标记选中的日期字符串（YYYY-MM-DD格式）
             selectedDateCheckins: [],
             monthStats: {
                 totalDays: 0,
@@ -107,12 +109,32 @@ export default {
                     this.checkinData = res.data.checkins;
                     this.generateCalendar();
                     this.calculateMonthStats();
+
+                    // 自动选择今天的日期
+                    this.selectTodayIfHasCheckin();
                 }
 
                 uni.hideLoading();
             } catch (error) {
                 uni.hideLoading();
                 console.error('加载日历数据失败:', error);
+            }
+        },
+
+        selectTodayIfHasCheckin() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+
+            // 只在当前月份时自动选择今天
+            if (year === this.currentYear && month === this.currentMonth) {
+                const todayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                // 无论今天是否有打卡记录，都显示今天的信息
+                this.selectedDate = `${month}月${day}日`;
+                this.selectedDateStr = todayStr;
+                this.selectedDateCheckins = this.checkinData[todayStr] || [];
             }
         },
 
@@ -222,13 +244,12 @@ export default {
         },
 
         selectDate(day) {
-            if (!day.isCurrentMonth || !day.hasCheckin) {
-                this.selectedDate = null;
-                this.selectedDateCheckins = [];
+            if (!day.isCurrentMonth) {
                 return;
             }
 
             this.selectedDate = `${this.currentMonth}月${day.day}日`;
+            this.selectedDateStr = day.date;
             this.selectedDateCheckins = this.checkinData[day.date] || [];
         },
 
@@ -240,6 +261,7 @@ export default {
                 this.currentMonth--;
             }
             this.selectedDate = null;
+            this.selectedDateStr = null;
             this.selectedDateCheckins = [];
             this.loadCalendarData();
         },
@@ -252,6 +274,7 @@ export default {
                 this.currentMonth++;
             }
             this.selectedDate = null;
+            this.selectedDateStr = null;
             this.selectedDateCheckins = [];
             this.loadCalendarData();
         },
@@ -372,6 +395,8 @@ export default {
     justify-content: center;
     position: relative;
     margin-bottom: 10rpx;
+    border: 3rpx solid transparent;
+    box-sizing: border-box;
 }
 
 .day-num {
@@ -401,6 +426,11 @@ export default {
 .day-cell.has-checkin .day-num {
     color: #FFFFFF;
     font-weight: bold;
+}
+
+.day-cell.selected {
+    border-color: #FF9800;
+    box-shadow: 0 0 0 2rpx rgba(255, 152, 0, 0.2);
 }
 
 .checkin-dot {

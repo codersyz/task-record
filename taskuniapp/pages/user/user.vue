@@ -147,7 +147,6 @@ export default {
                     const tasks = res.data;
                     this.stats.totalTasks = tasks.length;
                     this.stats.totalCheckins = tasks.reduce((sum, t) => sum + t.total_days, 0);
-                    this.stats.maxStreak = Math.max(...tasks.map(t => t.current_days), 0);
                 }
             } catch (error) {
                 console.error('加载统计信息失败:', error);
@@ -159,6 +158,8 @@ export default {
                 const res = await getUserPoints();
                 if (res.code === 200) {
                     this.pointsInfo = res.data;
+                    // 使用积分系统中的连续打卡天数作为最长连续打卡
+                    this.stats.maxStreak = res.data.consecutiveDays || 0;
                 }
             } catch (error) {
                 console.error('加载积分信息失败:', error);

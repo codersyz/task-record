@@ -10,6 +10,8 @@ const _sfc_main = {
       calendarDays: [],
       checkinData: {},
       selectedDate: null,
+      selectedDateStr: null,
+      // 用于标记选中的日期字符串（YYYY-MM-DD格式）
       selectedDateCheckins: [],
       monthStats: {
         totalDays: 0,
@@ -30,11 +32,24 @@ const _sfc_main = {
           this.checkinData = res.data.checkins;
           this.generateCalendar();
           this.calculateMonthStats();
+          this.selectTodayIfHasCheckin();
         }
         common_vendor.index.hideLoading();
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/calendar/calendar.vue:115", "加载日历数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/calendar/calendar.vue:120", "加载日历数据失败:", error);
+      }
+    },
+    selectTodayIfHasCheckin() {
+      const today = /* @__PURE__ */ new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      if (year === this.currentYear && month === this.currentMonth) {
+        const todayStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        this.selectedDate = `${month}月${day}日`;
+        this.selectedDateStr = todayStr;
+        this.selectedDateCheckins = this.checkinData[todayStr] || [];
       }
     },
     generateCalendar() {
@@ -110,12 +125,11 @@ const _sfc_main = {
       return continuous;
     },
     selectDate(day) {
-      if (!day.isCurrentMonth || !day.hasCheckin) {
-        this.selectedDate = null;
-        this.selectedDateCheckins = [];
+      if (!day.isCurrentMonth) {
         return;
       }
       this.selectedDate = `${this.currentMonth}月${day.day}日`;
+      this.selectedDateStr = day.date;
       this.selectedDateCheckins = this.checkinData[day.date] || [];
     },
     prevMonth() {
@@ -126,6 +140,7 @@ const _sfc_main = {
         this.currentMonth--;
       }
       this.selectedDate = null;
+      this.selectedDateStr = null;
       this.selectedDateCheckins = [];
       this.loadCalendarData();
     },
@@ -137,6 +152,7 @@ const _sfc_main = {
         this.currentMonth++;
       }
       this.selectedDate = null;
+      this.selectedDateStr = null;
       this.selectedDateCheckins = [];
       this.loadCalendarData();
     },
@@ -177,7 +193,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         d: !day.isCurrentMonth ? 1 : "",
         e: day.isToday ? 1 : "",
         f: day.hasCheckin ? 1 : "",
-        g: common_vendor.o(($event) => $options.selectDate(day), index)
+        g: day.date === $data.selectedDateStr ? 1 : "",
+        h: common_vendor.o(($event) => $options.selectDate(day), index)
       });
     }),
     j: $data.selectedDate && $data.selectedDateCheckins.length > 0

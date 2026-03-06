@@ -185,13 +185,26 @@ const _sfc_main = {
             icon: "success"
           });
         } else if (res[this.templateId] === "reject") {
-          common_vendor.index.showToast({
-            title: "您拒绝了订阅",
-            icon: "none"
-          });
+          setTimeout(() => {
+            common_vendor.index.showModal({
+              title: "订阅提示",
+              content: '您拒绝了订阅授权，将无法收到打卡提醒。\n\n如需开启提醒，请前往"我的-提醒设置"重新订阅。',
+              showCancel: false,
+              confirmText: "我知道了"
+            });
+          }, 500);
+        } else if (res[this.templateId] === "ban") {
+          setTimeout(() => {
+            common_vendor.index.showModal({
+              title: "订阅受限",
+              content: '您已被限制订阅该消息。请在微信"设置-通知-订阅消息"中重置权限。',
+              showCancel: false,
+              confirmText: "我知道了"
+            });
+          }, 500);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/checkin/checkin.vue:236", "订阅失败:", error);
+        common_vendor.index.__f__("error", "at pages/checkin/checkin.vue:250", "订阅失败:", error);
       }
     }
   }

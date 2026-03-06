@@ -55,10 +55,9 @@ const _sfc_main = {
           const tasks = res.data;
           this.stats.totalTasks = tasks.length;
           this.stats.totalCheckins = tasks.reduce((sum, t) => sum + t.total_days, 0);
-          this.stats.maxStreak = Math.max(...tasks.map((t) => t.current_days), 0);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:153", "加载统计信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:152", "加载统计信息失败:", error);
       }
     },
     async loadPoints() {
@@ -66,9 +65,10 @@ const _sfc_main = {
         const res = await api_point.getUserPoints();
         if (res.code === 200) {
           this.pointsInfo = res.data;
+          this.stats.maxStreak = res.data.consecutiveDays || 0;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/user/user.vue:164", "加载积分信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/user/user.vue:165", "加载积分信息失败:", error);
       }
     },
     // 编辑个人信息
