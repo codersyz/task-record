@@ -60,6 +60,11 @@
             <view v-for="item in checkinList" :key="item.id" class="record-item">
                 <view class="record-date">{{ formatDate(item.checkin_date) }}</view>
                 <view v-if="item.note" class="record-note">{{ item.note }}</view>
+                <!-- 打卡图片 -->
+                <view v-if="item.images && item.images.length > 0" class="record-images">
+                    <image v-for="(img, index) in item.images" :key="index" :src="img" mode="aspectFill"
+                        class="record-image" @click="previewImage(item.images, index)" />
+                </view>
             </view>
         </view>
     </view>
@@ -229,6 +234,14 @@ export default {
             const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
             const weekday = weekdays[date.getDay()];
             return `${month}月${day}日 星期${weekday}`;
+        },
+
+        // 预览图片
+        previewImage(images, current) {
+            uni.previewImage({
+                urls: images,
+                current: current
+            });
         }
     }
 };
@@ -384,5 +397,18 @@ export default {
 .record-note {
     font-size: 26rpx;
     color: #666666;
+}
+
+.record-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10rpx;
+    margin-top: 15rpx;
+}
+
+.record-image {
+    width: 200rpx;
+    height: 200rpx;
+    border-radius: 8rpx;
 }
 </style>

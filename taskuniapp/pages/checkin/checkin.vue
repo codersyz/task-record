@@ -5,6 +5,26 @@
                 <text class="label">打卡备注</text>
                 <textarea class="textarea" v-model="note" placeholder="记录今天的收获..." maxlength="200" />
             </view>
+
+            <!-- 图片上传区域 -->
+            <view class="form-item">
+                <text class="label">打卡图片（可选）</text>
+                <view class="image-upload">
+                    <view class="image-list">
+                        <view class="image-item" v-for="(img, index) in images" :key="index">
+                            <image :src="img" mode="aspectFill" class="preview-image" />
+                            <view class="delete-btn" @click="deleteImage(index)">
+                                <text class="iconfont icon-close">×</text>
+                            </view>
+                        </view>
+                        <view class="add-image" @click="chooseImage" v-if="images.length < 9">
+                            <text class="add-icon">+</text>
+                            <text class="add-text">添加图片</text>
+                        </view>
+                    </view>
+                    <view class="image-tip">最多上传9张图片，支持拍照或从相册选择</view>
+                </view>
+            </view>
         </view>
 
         <view class="btn-group">
@@ -18,12 +38,15 @@
 <script>
 import { checkin } from '@/api/task';
 import { recordSubscription, getSubscriptionStatus } from '@/api/subscription';
+import { uploadCheckinImage } from '@/api/upload';
 
 export default {
     data() {
         return {
             taskId: 0,
             note: '',
+            images: [], // 已选择的图片列表（本地路径）
+            uploadedImages: [], // 已上传到COS的图片URL列表
             loading: false,
             hasCheckedToday: false,
             // 模板ID - 需要在微信公众平台配置后替换
@@ -47,13 +70,84 @@ export default {
         }
     },
     methods: {
+        // 选择图片
+        chooseImage() {
+            uni.chooseImage({
+                count: 9 - this.images.length, // 最多9张
+                sizeType: ['compressed'], // 压缩图
+                sourceType: ['camera', 'album'], // 可以拍照或从相册选择
+                success: (res) => {
+                    this.images = this.images.concat(res.tempFilePaths);
+                },
+                fail: (error) => {
+                    console.error('选择图片失败:', error);
+                    uni.showToast({
+                        title: '选择图片失败',
+                        icon: 'none'
+                    });
+                }
+            });
+        },
+
+        // 删除图片
+        deleteImage(index) {
+            this.images.splice(index, 1);
+        },
+
+        // 上传所有图片到COS
+        async uploadImages() {
+            if (this.images.length === 0) {
+                return [];
+            }
+
+            uni.showLoading({
+                title: '上传图片中...',
+                mask: true
+            });
+
+            const uploadPromises = this.images.map(async (imagePath) => {
+                try {
+                    const result = await uploadCheckinImage(imagePath);
+                    return result.data.url;
+                } catch (error) {
+                    console.error('上传图片失败:', error);
+                    throw error;
+                }
+            });
+
+            try {
+                const urls = await Promise.all(uploadPromises);
+                uni.hideLoading();
+                return urls;
+            } catch (error) {
+                uni.hideLoading();
+                throw error;
+            }
+        },
+
         async handleCheckin() {
             this.loading = true;
 
             try {
+                // 如果有图片，先上传到COS
+                let imageUrls = [];
+                if (this.images.length > 0) {
+                    try {
+                        imageUrls = await this.uploadImages();
+                    } catch (error) {
+                        uni.showToast({
+                            title: '图片上传失败',
+                            icon: 'none'
+                        });
+                        this.loading = false;
+                        return;
+                    }
+                }
+
                 const res = await checkin({
                     taskId: this.taskId,
-                    note: this.note
+                    note: this.note,
+                    images: imageUrls
                 });
 
                 if (res.code === 200) {
@@ -300,5 +394,77 @@ export default {
     border-radius: 44rpx;
     font-size: 32rpx;
     border: none;
+}
+
+/* 图片上传样式 */
+.image-upload {
+    margin-top: 10rpx;
+}
+
+.image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20rpx;
+}
+
+.image-item {
+    position: relative;
+    width: 200rpx;
+    height: 200rpx;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 8rpx;
+}
+
+.delete-btn {
+    position: absolute;
+    top: -10rpx;
+    right: -10rpx;
+    width: 40rpx;
+    height: 40rpx;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-close {
+    color: #FFFFFF;
+    font-size: 32rpx;
+    line-height: 1;
+}
+
+.add-image {
+    width: 200rpx;
+    height: 200rpx;
+    border: 2rpx dashed #CCCCCC;
+    border-radius: 8rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #F9F9F9;
+}
+
+.add-icon {
+    font-size: 60rpx;
+    color: #999999;
+    line-height: 1;
+}
+
+.add-text {
+    font-size: 24rpx;
+    color: #999999;
+    margin-top: 10rpx;
+}
+
+.image-tip {
+    font-size: 24rpx;
+    color: #999999;
+    margin-top: 20rpx;
 }
 </style>

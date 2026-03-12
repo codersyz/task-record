@@ -21,6 +21,7 @@ app.use('/api/checkins', require('./routes/checkins'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/points', require('./routes/points'));
 app.use('/api/subscription', require('./routes/subscription'));
+app.use('/api/upload', require('./routes/upload'));
 
 // 健康检查
 app.get('/health', (req, res) => {

@@ -32,7 +32,9 @@
 ### 打卡功能
 
 - ✅ 每日打卡（支持拍照、添加备注）
-- ✅ 打卡记录查看
+- ✅ 打卡图片上传（腾讯云COS存储）🆕
+- ✅ 支持拍照或从相册选择（最多9张）🆕
+- ✅ 打卡记录查看（含图片预览）🆕
 - ✅ 打卡日历视图（月历展示）
 - ✅ 打卡状态实时显示
 - ✅ 自动完成任务（达到目标天数）
@@ -77,6 +79,7 @@
 - JWT 认证
 - axios
 - multer（文件上传）
+- cos-nodejs-sdk-v5（腾讯云COS）
 
 ## 项目结构
 
@@ -176,6 +179,10 @@ cp .env.example .env
 # JWT_SECRET=你的密钥
 # WECHAT_APPID=你的小程序AppID
 # WECHAT_SECRET=你的小程序Secret
+# COS_SECRET_ID=腾讯云SecretId（用于图片上传）
+# COS_SECRET_KEY=腾讯云SecretKey
+# COS_BUCKET=COS存储桶名称
+# COS_REGION=COS地域（如ap-guangzhou）
 
 # 启动后端服务
 npm start
@@ -537,6 +544,31 @@ mysql -u root -p task_checkin < config/add-points-system.sql
 
 详见 [订阅消息配置指南](task-backend/SUBSCRIPTION_SETUP.md)
 
+### 11. 打卡图片上传失败 🆕
+
+**问题原因**：腾讯云COS未配置或配置错误
+
+**解决方案**：
+
+1. 检查 `.env` 文件中的COS配置是否正确
+2. 确认存储桶权限设置为"公有读私有写"
+3. 检查密钥是否有效
+4. 查看后端日志：`pm2 logs task-backend`
+5. 测试上传接口是否正常
+
+详见 [腾讯云COS配置指南](task-backend/COS_SETUP.md)
+
+### 12. 打卡图片无法显示 🆕
+
+**问题原因**：存储桶权限或跨域配置问题
+
+**解决方案**：
+
+1. 确保存储桶设置为"公有读"
+2. 在COS控制台配置跨域规则（CORS）
+3. 检查图片URL是否正确
+4. 在浏览器中直接访问图片URL测试
+
 ## 测试工具
 
 项目提供了一些测试工具帮助开发和调试：
@@ -620,6 +652,15 @@ chmod +x deploy-to-server.sh
 3. 上传代码到微信公众平台
 4. 提交审核
 
+## 相关文档
+
+- [订阅消息功能](SUBSCRIPTION_FEATURE.md)
+- [游客模式更新](GUEST_MODE_UPDATE.md)
+- [打卡图片上传配置](task-backend/IMAGE_UPLOAD_SETUP.md) 🆕
+- [订阅消息配置](task-backend/SUBSCRIPTION_SETUP.md)
+- [API状态码说明](task-backend/API_STATUS_CODES.md)
+- [后端部署说明](task-backend/DEPLOYMENT.md)
+
 ## 许可证
 
 MIT
@@ -629,6 +670,15 @@ MIT
 开发于 2026年2月
 
 ## 更新日志
+
+### v1.6.0 (2026-03-12) 🆕
+
+- ✅ 新增打卡图片上传功能
+- ✅ 支持拍照或从相册选择（最多9张）
+- ✅ 图片自动上传到腾讯云COS
+- ✅ 打卡记录显示图片
+- ✅ 支持图片预览和删除
+- ✅ 按年月组织存储路径
 
 ### v1.5.0 (2026-02-28) 🆕
 
