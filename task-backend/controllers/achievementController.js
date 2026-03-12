@@ -110,17 +110,34 @@ async function getUserStats(userId) {
         [userId]
     );
 
-    // 最长连续打卡天数（从所有任务中取最大值）
-    const [maxStreak] = await db.query(
-        'SELECT MAX(current_days) as max_streak FROM tasks WHERE user_id = ?',
+    // 获取用户的连续打卡天数和历史最长连续打卡
+    const [userInfo] = await db.query(
+        'SELECT consecutive_days, max_consecutive_days FROM users WHERE id = ?',
         [userId]
     );
+
+    // 当前连续打卡天数
+    const currentStreak = userInfo[0]?.consecutive_days || 0;
+    
+    // 历史最长连续打卡天数（如果没有max_consecutive_days字段，使用当前连续天数）
+    let maxStreak = userInfo[0]?.max_consecutive_days || 0;
+    
+    // 如果当前连续天数大于历史最长，更新历史最长
+    if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+        // 更新数据库中的最长连续记录
+        await db.query(
+            'UPDATE users SET max_consecutive_days = ? WHERE id = ?',
+            [maxStreak, userId]
+        );
+    }
 
     return {
         totalCheckins: checkinCount[0].count,
         completedTasks: completedTasks[0].count,
         activeTasks: activeTasks[0].count,
-        maxStreak: maxStreak[0].max_streak || 0
+        currentStreak: currentStreak,
+        maxStreak: maxStreak
     };
 }
 
